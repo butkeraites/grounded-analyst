@@ -1,5 +1,12 @@
-import { bigint, integer, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { bigint, customType, integer, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import type { Artifact, DatasetProfile } from "../types.js";
+
+/** Raw binary column — for storing dataset bytes when the FS isn't durable (serverless). */
+const bytea = customType<{ data: Buffer; driverData: Buffer }>({
+  dataType() {
+    return "bytea";
+  },
+});
 
 /**
  * The persistence schema for the core analyst service, owned by `packages/core`
@@ -63,6 +70,13 @@ export const runs = pgTable("runs", {
   repairAttempts: integer("repair_attempts").notNull().default(0),
   durationMs: integer("duration_ms"),
   artifacts: jsonb("artifacts").$type<Artifact[]>(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+/** Durable dataset bytes, keyed by storageKey — the serverless-safe Storage backend. */
+export const datasetFiles = pgTable("dataset_files", {
+  key: text("key").primaryKey(),
+  bytes: bytea("bytes").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 

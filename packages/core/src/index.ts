@@ -48,9 +48,10 @@ export type {
 } from "./sandbox/client.js";
 export { DockerSandbox, type DockerSandboxOptions } from "./sandbox/docker.js";
 
-// Storage port + local adapter.
+// Storage port + adapters (local FS for dev, Postgres bytea for serverless).
 export type { Storage } from "./storage/client.js";
 export { LocalStorage } from "./storage/local.js";
+export { PostgresStorage } from "./storage/postgres.js";
 
 // Persistence layer — owned by the core so both clients share one schema.
 export { getDb, pingDb, closeDb, type Db } from "./db/client.js";
