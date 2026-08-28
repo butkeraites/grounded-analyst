@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getService } from "@/lib/core";
 import { repositories } from "@/lib/db";
 import { getAnalytics } from "@/lib/analytics";
+import { rateLimited } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,6 +19,9 @@ export async function GET() {
 
 /** Upload a CSV → store, profile (in the sandbox), persist, and suggest questions. */
 export async function POST(req: Request) {
+  const limited = await rateLimited(req);
+  if (limited) return limited;
+
   const form = await req.formData();
   const file = form.get("file");
   if (!(file instanceof File)) {
