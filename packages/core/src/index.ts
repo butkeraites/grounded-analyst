@@ -47,6 +47,7 @@ export type {
   ExecutionResult,
 } from "./sandbox/client.js";
 export { DockerSandbox, type DockerSandboxOptions } from "./sandbox/docker.js";
+export { E2BSandbox, type E2BSandboxOptions } from "./sandbox/e2b.js";
 
 // Storage port + adapters (local FS for dev, Postgres bytea for serverless).
 export type { Storage } from "./storage/client.js";
