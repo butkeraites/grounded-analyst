@@ -13,12 +13,18 @@ import * as schema from "./schema.js";
 
 export type Db = NodePgDatabase<typeof schema>;
 
+/** SSL is required by hosted Postgres (Neon), but not by the local container. */
+export function sslFor(connectionString: string): { rejectUnauthorized: boolean } | undefined {
+  const local = /@(localhost|127\.0\.0\.1|postgres)(:|\/)/.test(connectionString);
+  return local ? undefined : { rejectUnauthorized: false };
+}
+
 const cache = new Map<string, { pool: Pool; db: Db }>();
 
 export function getDb(connectionString: string): Db {
   let entry = cache.get(connectionString);
   if (!entry) {
-    const pool = new Pool({ connectionString, max: 5 });
+    const pool = new Pool({ connectionString, max: 5, ssl: sslFor(connectionString) });
     const db = drizzle(pool, { schema });
     entry = { pool, db };
     cache.set(connectionString, entry);

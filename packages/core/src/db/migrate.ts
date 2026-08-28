@@ -2,6 +2,7 @@ import { fileURLToPath } from "node:url";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Pool } from "pg";
+import { sslFor } from "./client.js";
 
 /**
  * Standalone migration runner. Applies every pending SQL migration in
@@ -12,13 +13,15 @@ import { Pool } from "pg";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
-  console.error("[migrate] DATABASE_URL is not set");
-  process.exit(1);
+  // Skip gracefully (exit 0) so a build step without a DB configured — e.g. a
+  // Vercel preview — doesn't fail. Production has DATABASE_URL and migrates.
+  console.error("[migrate] DATABASE_URL not set — skipping migrations");
+  process.exit(0);
 }
 
 const migrationsFolder = fileURLToPath(new URL("../../drizzle", import.meta.url));
 
-const pool = new Pool({ connectionString });
+const pool = new Pool({ connectionString, ssl: sslFor(connectionString) });
 const db = drizzle(pool);
 
 try {
