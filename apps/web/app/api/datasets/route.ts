@@ -5,6 +5,10 @@ import { getAnalytics } from "@/lib/analytics";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
+
+// Cap uploads so a huge file can't exhaust memory or run up sandbox cost.
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5 MB
 
 /** List datasets (most recent first) for the workspace. */
 export async function GET() {
@@ -18,6 +22,12 @@ export async function POST(req: Request) {
   const file = form.get("file");
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "expected a file field" }, { status: 400 });
+  }
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return NextResponse.json(
+      { error: `file too large (max ${MAX_UPLOAD_BYTES / 1024 / 1024} MB)` },
+      { status: 413 },
+    );
   }
 
   const service = getService();

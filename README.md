@@ -5,9 +5,13 @@ and a written interpretation — from **real Python executed in an isolated
 sandbox**, never a number the model guessed. A portfolio clone of
 [Julius.AI](https://julius.ai) built on its exact stack.
 
-> **Status: the core loop works end-to-end, 100% local in Docker.** Upload → data
-> profile → ask → **real Python executed in an isolated sandbox** → streamed
-> prose + chart + table + the generated code. See the roadmap for what's next.
+> **Status: live and end-to-end.** Deployed on **Vercel + Neon + E2B + Groq**
+> (the deployment mirrors Julius's own stack), and runs 100% local in Docker for
+> development. Upload → data profile → ask → **real Python executed in an isolated
+> sandbox** → streamed prose + chart + table + the generated code.
+>
+> The live demo is password-gated (it executes code and calls a paid LLM) —
+> ask for the password.
 
 ![The core loop: ask a question → streamed prose → a real matplotlib chart → a result table → the generated Python, on toggle.](docs/loop.gif)
 
