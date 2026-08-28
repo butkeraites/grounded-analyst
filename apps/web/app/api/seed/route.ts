@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getService, datasetsStorage } from "@/lib/core";
 import { repositories } from "@/lib/db";
+import { rateLimited } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -37,7 +38,10 @@ const SEED_SUGGESTIONS = [
  * Ensures the seeded sample dataset exists, so the live URL demos in one click.
  * Idempotent: returns the existing seed if already loaded, else uploads it.
  */
-export async function GET() {
+export async function GET(req: Request) {
+  const limited = await rateLimited(req);
+  if (limited) return limited;
+
   const service = getService();
   const storage = datasetsStorage();
 

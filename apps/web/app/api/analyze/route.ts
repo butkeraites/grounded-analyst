@@ -1,5 +1,6 @@
 import { getService } from "@/lib/core";
 import { getAnalytics } from "@/lib/analytics";
+import { rateLimited } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,6 +15,9 @@ export const maxDuration = 60;
  * server-side; the client just renders the stream.
  */
 export async function POST(req: Request) {
+  const limited = await rateLimited(req);
+  if (limited) return limited;
+
   const { datasetId, question, conversationId } = await req.json();
   if (!datasetId || !question) {
     return new Response(JSON.stringify({ error: "datasetId and question are required" }), {
