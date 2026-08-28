@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "grounded-analyst": {
+      "command": "npx",
+      "args": ["tsx", "apps/mcp/src/server.ts"],
+      "env": {
+        "DATABASE_URL": "postgres://grounded:grounded@localhost:5432/grounded",
+        "REDIS_URL": "redis://localhost:6379",
+        "DATASETS_DIR": "./.data",
+        "SANDBOX_IMAGE": "grounded-sandbox:latest",
+        "CASSETTE_PATH": "seed/cassette.sales.json"
+      }
+    }
+  }
+}

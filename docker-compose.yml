@@ -1,0 +1,118 @@
+# One command — `docker compose up` — brings up the whole stack locally:
+# Next.js web + Postgres + Redis. No hosted vendor is required. Everything the
+# app reads (DATABASE_URL, REDIS_URL) points at a service on this network.
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      # Host port is overridable (WEB_PORT) in case 3000 is taken locally.
+      - "${WEB_PORT:-3000}:3000"
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgres://grounded:grounded@postgres:5432/grounded}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      NODE_ENV: development
+      WATCHPACK_POLLING: "true" # reliable file-watching for the bind mount
+      # Where uploaded datasets are written (inside web) and how the sandbox
+      # mounts them (a named volume the host daemon knows).
+      DATASETS_DIR: /app/.data
+      SANDBOX_DATASETS_MOUNT: grounded_datasets
+      SANDBOX_IMAGE: grounded-sandbox:latest
+      SEED_DIR: /app/seed
+      CASSETTE_PATH: /app/seed/cassette.sales.json
+      # Fail a non-cassette question fast (with a clear message) when no model
+      # is connected to the bridge, instead of hanging.
+      LLM_BRIDGE_TIMEOUT_MS: "25000"
+      # Local LLM (Ollama, OpenAI-compatible) — the fallback for questions the
+      # cassette doesn't cover. 100% local; swap LLM_MODEL for a bigger model.
+      LLM_BASE_URL: http://ollama:11434/v1
+      LLM_API_KEY: ollama
+      LLM_MODEL: qwen2.5-coder:3b
+    volumes:
+      # Bind-mount source for hot-reload; keep container-installed modules and
+      # the Next build cache as anonymous volumes so host state can't shadow them.
+      - .:/app
+      - /app/node_modules
+      - /app/apps/web/node_modules
+      - /app/packages/core/node_modules
+      - /app/apps/web/.next
+      # Shared dataset store (named volume) + the Docker socket to spawn sandboxes.
+      - datasets:/app/.data
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  # One-shot: applies pending DB migrations, then exits. Reuses the web image
+  # (which already has the workspace installed) so `docker compose up` brings the
+  # schema forward before the web app starts serving.
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    command: ["npm", "run", "db:migrate", "--workspace", "@grounded/core"]
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgres://grounded:grounded@postgres:5432/grounded}
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/apps/web/node_modules
+      - /app/packages/core/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: grounded
+      POSTGRES_PASSWORD: grounded
+      POSTGRES_DB: grounded
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U grounded -d grounded"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Local LLM (100% local, no external API). The code-gen model is pulled into
+  # the `ollama` volume once: `docker compose exec ollama ollama pull <model>`.
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  pgdata:
+  ollama:
+  # Explicit name so the web container's docker CLI can reference it by a stable
+  # name when spawning sandbox containers (-v grounded_datasets:/data:ro).
+  datasets:
+    name: grounded_datasets

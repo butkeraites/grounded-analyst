@@ -1,0 +1,23 @@
+{
+  "name": "grounded-analyst",
+  "private": true,
+  "version": "0.1.0",
+  "description": "AI data analyst — upload a dataset, ask in plain English, get real executed Python back. Portfolio clone of Grounded.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build:core": "npm run build --workspace @grounded/core",
+    "dev": "npm run dev --workspace web",
+    "lint": "npm run lint --workspace web",
+    "typecheck": "npm run build --workspace @grounded/core && npm run typecheck --workspace web",
+    "test": "npm test --workspace @grounded/core",
+    "mcp": "npm run start --workspace mcp",
+    "cli:analyze": "tsx packages/core/src/cli/analyze.ts",
+    "cli:worker": "tsx packages/core/src/cli/worker.ts"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
