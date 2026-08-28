@@ -3,6 +3,9 @@ import { getAnalytics } from "@/lib/analytics";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// The loop spins up an E2B sandbox and calls the LLM twice; give it room so a
+// serverless timeout doesn't cut a legitimate analysis short.
+export const maxDuration = 60;
 
 /**
  * Streams an analysis turn as Server-Sent Events: `phase` events as the loop
