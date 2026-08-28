@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "julius-clone": {
+      "command": "npx",
+      "args": ["tsx", "apps/mcp/src/server.ts"],
+      "env": {
+        "DATABASE_URL": "postgres://julius:julius@localhost:5432/julius",
+        "REDIS_URL": "redis://localhost:6379",
+        "DATASETS_DIR": "./.data",
+        "SANDBOX_IMAGE": "julius-sandbox:latest",
+        "CASSETTE_PATH": "seed/cassette.sales.json"
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# next
+apps/web/.next/
+apps/web/out/
+apps/web/next-env.d.ts
+
+# builds
+packages/*/dist/
+*.tsbuildinfo
+
+# local dataset storage (dev)
+.data/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# logs
+*.log
+npm-debug.log*
+
+# os / editor
+.DS_Store
+.idea/
+.vscode/

@@ -1,0 +1,32 @@
+$ npm run agent --workspace mcp
+
+Connected. Tools: upload_dataset, list_datasets, suggest_questions, run_analysis,
+                   get_code, get_table, get_chart, list_conversations,
+                   get_conversation, llm_pull_request, llm_submit_response
+
+→ upload_dataset(sales.csv)
+  dataset ab66d79b-46fd-48de-9c34-bbf992d5c881: 12 rows, 5 columns
+
+→ run_analysis("Which region generates the most revenue, and how does it break down by product?")
+  interpretation: North is the top-revenue region at $26,990, ahead of South's
+  $21,800 — about a 24% lead. Within North, the two products are close but Gadget
+  is the larger contributor at $14,840 (55% of the region's revenue) versus
+  Widget's $12,150. The same ordering holds in South (Gadget $11,900 vs Widget
+  $9,900), so Gadget outsells Widget in both regions.
+  artifacts: chart, table · runId fb4b212a-4a7d-4cf0-a4aa-db429e2df8ce
+
+→ get_code(runId)
+  region_rev = df.groupby('region')['revenue'].sum().sort_values(ascending=False)
+  top_region = region_rev.idxmax()
+  print("Total revenue by region:")
+  …
+
+→ get_table(runId)
+  columns: region, Gadget, Widget · 2 rows
+
+→ get_chart(runId)
+  received image/png chart (27681 bytes)
+
+✓ The agent uploaded a dataset, asked a question, and pulled back the
+  interpretation, the generated Python, the result table, and the chart —
+  entirely over MCP.

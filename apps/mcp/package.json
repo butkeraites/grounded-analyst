@@ -1,0 +1,20 @@
+{
+  "name": "mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "MCP server exposing the Julius clone's capability surface. Milestone 1 of it: the LLM-worker tools, so an MCP host (Claude) powers the platform's model over the bridge.",
+  "scripts": {
+    "start": "tsx src/server.ts",
+    "agent": "tsx src/example-agent.ts"
+  },
+  "dependencies": {
+    "@julius/core": "*",
+    "@modelcontextprotocol/sdk": "^1.13.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.0"
+  }
+}
