@@ -4,6 +4,8 @@ import { repositories } from "@/lib/db";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// Uploading the seed profiles it in an E2B sandbox — allow time for cold start.
+export const maxDuration = 60;
 
 const SEED_NAME = "sales.csv";
 
