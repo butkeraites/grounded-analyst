@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "cd ../.. && npm run build:core && cd apps/web && next build",
+    "build": "cd ../.. && npm run build:core && npm run db:migrate --workspace @grounded/core && cd apps/web && next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
