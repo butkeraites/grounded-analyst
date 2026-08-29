@@ -75,7 +75,13 @@ export class E2BSandbox implements SandboxClient, Profiler {
   /** Spin up an ephemeral sandbox, upload the dataset, run the harness, tear down. */
   private async run(job: Record<string, unknown>, datasetFile: string, timeoutMs: number): Promise<Record<string, any>> {
     const bytes = await this.storage.read(datasetFile);
-    const sandbox = await Sandbox.create({ apiKey: this.apiKey, timeoutMs: timeoutMs + 15_000 });
+    // allowInternetAccess: false blocks egress from the untrusted-code sandbox,
+    // matching the Docker path's `--network none` (dev/prod isolation parity).
+    const sandbox = await Sandbox.create({
+      apiKey: this.apiKey,
+      timeoutMs: timeoutMs + 15_000,
+      allowInternetAccess: false,
+    });
     try {
       await sandbox.files.write(DATA_PATH, new TextDecoder().decode(bytes));
       const program = harness(job);

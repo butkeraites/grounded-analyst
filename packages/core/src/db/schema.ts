@@ -69,6 +69,9 @@ export const runs = pgTable("runs", {
   /** How many code-gen -> execute retries the repair loop needed (0 = first try). */
   repairAttempts: integer("repair_attempts").notNull().default(0),
   durationMs: integer("duration_ms"),
+  /** LLM token usage for the turn — the basis for cost accounting. */
+  promptTokens: integer("prompt_tokens"),
+  completionTokens: integer("completion_tokens"),
   artifacts: jsonb("artifacts").$type<Artifact[]>(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });

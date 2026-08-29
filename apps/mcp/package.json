@@ -6,7 +6,8 @@
   "description": "MCP server exposing the Grounded clone's capability surface. Milestone 1 of it: the LLM-worker tools, so an MCP host (Claude) powers the platform's model over the bridge.",
   "scripts": {
     "start": "tsx src/server.ts",
-    "agent": "tsx src/example-agent.ts"
+    "agent": "tsx src/example-agent.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@grounded/core": "*",

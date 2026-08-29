@@ -1,0 +1,20 @@
+[
+  {
+    "id": "region-breakdown",
+    "csv": "seed/sales.csv",
+    "question": "Which region generates the most revenue, and how does it break down by product?",
+    "expect": { "values": ["North", 26990, 21800, "Gadget", 14840, 12150], "artifacts": ["chart", "table"] }
+  },
+  {
+    "id": "monthly-trend",
+    "csv": "seed/sales.csv",
+    "question": "How do monthly revenue trends compare between North and South?",
+    "expect": { "values": [7800, 9090, 10100, 5850, 7150, 8800], "artifacts": ["chart", "table"] }
+  },
+  {
+    "id": "product-revenue",
+    "csv": "seed/sales.csv",
+    "question": "Which product drives more revenue overall, Widget or Gadget?",
+    "expect": { "values": ["Gadget", 26740, "Widget", 22050], "artifacts": ["chart", "table"] }
+  }
+]
