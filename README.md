@@ -1,5 +1,7 @@
 # Julius clone — AI data analyst
 
+[![CI](https://github.com/butkeraites/julius-clone/actions/workflows/ci.yml/badge.svg)](https://github.com/butkeraites/julius-clone/actions/workflows/ci.yml)
+
 Upload a dataset, ask a question in plain English, and get back a chart, a table,
 and a written interpretation — from **real Python executed in an isolated
 sandbox**, never a number the model guessed. A portfolio clone of
@@ -204,6 +206,16 @@ blocked**, **timeout killed**), profiling, upload, the persistence round-trip,
 the LLM bridge + cassette, and a full **replay** run (seeded demo, no model
 attached). Each test self-skips if its dependency (Docker image / `DATABASE_URL`)
 is absent.
+
+## Measured quality — the eval harness
+
+`npm run eval` runs the real loop over a golden set and scores **execution-based
+correctness** (do the expected values appear in the *executed* output?) and
+**grounding faithfulness** (is every data figure in the interpretation actually
+produced by the code?) — turning "never fabricate" into a measured property. It
+runs deterministically in **cassette mode** ($0, the CI gate) or **live** against
+a real model. **CI** (`.github/workflows/ci.yml`) gates every PR with typecheck +
+lint + build + tests + the eval regression gate — all free, no paid APIs.
 
 ## What's next
 

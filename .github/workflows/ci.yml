@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: julius
+          POSTGRES_PASSWORD: julius
+          POSTGRES_DB: julius
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U julius -d julius"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      # $0: uses the local Postgres service + a locally-built Docker sandbox; no
+      # paid APIs are called (E2B/LLM tests self-skip without keys).
+      DATABASE_URL: postgres://julius:julius@localhost:5432/julius
+      SANDBOX_IMAGE: julius-sandbox:latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+
+      - name: Build the sandbox image
+        run: docker build -t julius-sandbox:latest ./sandbox
+
+      - name: Typecheck (core + web + mcp + eval)
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build web
+        run: npm run build --workspace web
+
+      - name: Migrate the database
+        run: npm run db:migrate --workspace @julius/core
+
+      - name: Tests
+        run: npm test --workspace @julius/core
+
+      - name: Grader unit tests
+        run: npm test --workspace @julius/eval
+
+      - name: Eval — analyst quality regression gate (cassette, $0)
+        run: npm run eval
+
+      - name: Dependency audit (advisory)
+        run: npm audit --omit=dev || true

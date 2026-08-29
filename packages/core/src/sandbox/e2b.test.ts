@@ -47,6 +47,15 @@ test("e2b: a crashing script returns a traceback, not a throw", { skip: !E2B_API
   assert.match(res.stderr, /KeyError|nope/);
 });
 
+test("e2b: the network is blocked (allowInternetAccess: false)", { skip: !E2B_API_KEY }, async () => {
+  const res = await sandbox().execute({
+    datasetFile: "sales.csv",
+    code: "import urllib.request; urllib.request.urlopen('http://example.com', timeout=5)",
+  });
+  assert.equal(res.ok, false, "network call must fail");
+  assert.match(res.stderr, /URLError|Network is unreachable|Errno|getaddrinfo|Temporary failure|timed out/i);
+});
+
 test("e2b: profiling reports shape and per-column types", { skip: !E2B_API_KEY }, async () => {
   const profile = await sandbox().profile("sales.csv");
   assert.equal(profile.rowCount, 3);

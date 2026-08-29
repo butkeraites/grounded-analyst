@@ -8,7 +8,7 @@ import type {
 } from "./types.js";
 import { extname } from "node:path";
 import { randomUUID } from "node:crypto";
-import type { LLMProvider } from "./llm/provider.js";
+import { hasUsage, type LLMProvider } from "./llm/provider.js";
 import type { SandboxClient, Profiler } from "./sandbox/client.js";
 import type { Storage } from "./storage/client.js";
 import type { Repositories } from "./db/repositories.js";
@@ -156,6 +156,8 @@ export function createCoreService(deps: CoreDeps): CoreService {
         execution = await sandbox.execute({ code, datasetFile: dataset.storageKey });
       }
 
+      const usage = () => (hasUsage(llm) ? llm.getUsage() : undefined);
+
       if (!execution.ok) {
         await repos.runs.complete(run.id, {
           status: "error",
@@ -163,6 +165,8 @@ export function createCoreService(deps: CoreDeps): CoreService {
           stderr: execution.stderr,
           repairAttempts,
           durationMs: execution.durationMs,
+          promptTokens: usage()?.promptTokens,
+          completionTokens: usage()?.completionTokens,
         });
         throw new Error(`execution failed after ${repairAttempts} repair attempt(s): ${execution.stderr}`);
       }
@@ -187,6 +191,8 @@ export function createCoreService(deps: CoreDeps): CoreService {
         artifacts: execution.artifacts,
         repairAttempts,
         durationMs: execution.durationMs,
+        promptTokens: usage()?.promptTokens,
+        completionTokens: usage()?.completionTokens,
         messageId: assistant.id,
       });
 
