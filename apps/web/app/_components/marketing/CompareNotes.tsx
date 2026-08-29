@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const EMAIL = "rbritobut@gmail.com";
+const EMAIL = "renan@butkeraites.com";
 
 export function CompareNotes() {
   const [copied, setCopied] = useState(false);
