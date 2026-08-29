@@ -50,6 +50,9 @@ jobs:
       - name: Tests
         run: npm test --workspace @grounded/core
 
+      - name: Web unit tests (auth gate, rate-limit)
+        run: npm test --workspace web
+
       - name: Grader unit tests
         run: npm test --workspace @grounded/eval
 

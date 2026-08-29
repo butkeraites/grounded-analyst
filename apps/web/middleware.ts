@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { basicAuthOk } from "@/lib/auth";
 
 /**
  * A simple shared-password gate for the public deployment. The app EXECUTES
@@ -13,14 +14,8 @@ export function middleware(req: NextRequest) {
   if (!password) return NextResponse.next();
 
   const user = process.env.SITE_USER ?? "grounded";
-  const header = req.headers.get("authorization");
-  if (header?.startsWith("Basic ")) {
-    try {
-      const [u, p] = atob(header.slice(6)).split(":");
-      if (u === user && p === password) return NextResponse.next();
-    } catch {
-      // fall through to 401
-    }
+  if (basicAuthOk(req.headers.get("authorization"), user, password)) {
+    return NextResponse.next();
   }
   return new NextResponse("Authentication required.", {
     status: 401,
