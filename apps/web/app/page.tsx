@@ -3,6 +3,7 @@ import { Logo, LogoMark } from "./_components/brand/Logo";
 import { LoopDiagram } from "./_components/marketing/LoopDiagram";
 import { IdeaExplorer } from "./_components/marketing/IdeaExplorer";
 import { StackDiagram } from "./_components/marketing/StackDiagram";
+import { CompareNotes } from "./_components/marketing/CompareNotes";
 
 const REPO = "https://github.com/butkeraites/julius-clone";
 const ARCHITECTURE = `${REPO}/blob/main/docs/ARCHITECTURE.md`;
@@ -98,12 +99,7 @@ export default function Landing() {
           Outsider&apos;s guesses — some may already be on your roadmap, some I may have read wrong. I&apos;d
           enjoy comparing notes.
         </p>
-        <a
-          href="mailto:rbritobut@gmail.com"
-          className="mt-6 inline-block rounded-lg border border-line px-5 py-2.5 text-sm font-medium text-ink/80 hover:border-ink/30"
-        >
-          Compare notes →
-        </a>
+        <CompareNotes />
       </section>
 
       <footer className="border-t border-line">
