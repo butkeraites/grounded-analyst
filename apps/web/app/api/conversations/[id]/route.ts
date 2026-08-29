@@ -4,6 +4,7 @@ import { getService } from "@/lib/core";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 30;
 
 /** Load a conversation's full turns — joining runs so charts/tables/code return on reload. */
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
