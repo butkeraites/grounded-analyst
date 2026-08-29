@@ -38,6 +38,7 @@ export {
 } from "./service.js";
 export { CompositeLLMProvider } from "./llm/composite.js";
 export { createCoreServiceFromEnv, type Bootstrapped } from "./bootstrap.js";
+export { logger, type Logger } from "./observability/logger.js";
 
 // Execution tier (ports + the Docker adapter).
 export type {
@@ -65,5 +66,6 @@ export {
   type RunRepo,
   type NewDataset,
   type RunCompletion,
+  type UsageStats,
 } from "./db/repositories.js";
 export type { DatasetRow, ConversationRow, MessageRow, RunRow } from "./db/schema.js";

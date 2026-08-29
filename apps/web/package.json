@@ -7,7 +7,8 @@
     "build": "cd ../.. && npm run build:core && (npm run db:migrate --workspace @julius/core || echo '[build] migrate skipped/failed — non-fatal') && cd apps/web && next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test \"lib/**/*.test.ts\""
   },
   "dependencies": {
     "@julius/core": "*",
@@ -16,6 +17,7 @@
     "ioredis": "^5.4.1",
     "next": "^15.1.0",
     "pg": "^8.13.1",
+    "posthog-node": "^4.3.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -29,6 +31,7 @@
     "eslint-config-next": "^15.1.0",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.2",
     "typescript": "^5.6.0"
   }
 }

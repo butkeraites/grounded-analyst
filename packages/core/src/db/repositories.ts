@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import type { Db } from "./client.js";
 import { conversations, datasets, messages, runs } from "./schema.js";
 import type { ConversationRow, MessageRow, RunRow } from "./schema.js";
@@ -52,10 +52,20 @@ export interface MessageRepo {
   add(input: { conversationId: string; role: "user" | "assistant"; content: string }): Promise<MessageRow>;
   listByConversation(conversationId: string): Promise<MessageRow[]>;
 }
+/** Aggregate operational/cost metrics over all runs. */
+export interface UsageStats {
+  analyses: number;
+  successes: number;
+  avgDurationMs: number;
+  promptTokens: number;
+  completionTokens: number;
+}
+
 export interface RunRepo {
   create(input: { conversationId: string; datasetId: string; question: string }): Promise<RunRow>;
   complete(id: string, patch: RunCompletion): Promise<RunRow>;
   get(id: string): Promise<RunRow | null>;
+  usageStats(): Promise<UsageStats>;
 }
 export interface Repositories {
   datasets: DatasetRepo;
@@ -194,6 +204,18 @@ export function makeRepositories(db: Db): Repositories {
       async get(id: string): Promise<RunRow | null> {
         const [row] = await db.select().from(runs).where(eq(runs.id, id)).limit(1);
         return row ?? null;
+      },
+      async usageStats(): Promise<UsageStats> {
+        const [r] = await db
+          .select({
+            analyses: sql<number>`count(*)::int`,
+            successes: sql<number>`count(*) filter (where ${runs.status} = 'success')::int`,
+            avgDurationMs: sql<number>`coalesce(round(avg(${runs.durationMs})), 0)::int`,
+            promptTokens: sql<number>`coalesce(sum(${runs.promptTokens}), 0)::int`,
+            completionTokens: sql<number>`coalesce(sum(${runs.completionTokens}), 0)::int`,
+          })
+          .from(runs);
+        return r ?? { analyses: 0, successes: 0, avgDurationMs: 0, promptTokens: 0, completionTokens: 0 };
       },
     },
   };

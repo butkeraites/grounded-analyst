@@ -54,6 +54,7 @@ function fakeRepos() {
         return { id, conversationId: "conv1", datasetId: dataset.id, messageId: null, question: "q", status: patch.status, code: null, stdout: null, stderr: null, repairAttempts: patch.repairAttempts ?? 0, durationMs: null, artifacts: null, createdAt: new Date() };
       },
       async get() { return null; },
+      async usageStats() { return { analyses: 0, successes: 0, avgDurationMs: 0, promptTokens: 0, completionTokens: 0 }; },
     },
   } satisfies Repositories;
   return { repos, calls };
