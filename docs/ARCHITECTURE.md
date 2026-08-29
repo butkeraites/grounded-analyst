@@ -217,6 +217,18 @@ cost‑per‑analysis accounting.
 
 ---
 
+## 7.45 Observability &amp; cost
+
+You can't run what you can't see. One observability seam (`apps/web/lib/analytics`)
+carries the funnel (upload → question → run → chart) and errors: it always writes
+structured JSON logs (`pino`, `packages/core/.../logger.ts`) and, when
+`POSTHOG_KEY` is set, also emits to PostHog — a real adapter behind the seam, not
+a no-op; a Sentry error sink drops in the same way. Nothing external is required
+(no key → logs only), which keeps the seam honest and $0. Each `runs` row records
+token usage, so `/usage` reports live unit economics — analyses, success rate,
+avg duration, tokens, and estimated cost per the configured price. Cost thinking
+is built in, not bolted on.
+
 ## 7.5 Measured quality — the eval harness + CI
 
 For an AI data analyst, "it works" is a claim you must *measure*, not assert.

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { clientIp } from "./auth";
 
 /**
  * Per-IP rate limiting for the expensive endpoints (each analysis spins up an
@@ -28,10 +29,6 @@ function limiter(): Ratelimit | null {
   return cached;
 }
 
-function clientIp(req: Request): string {
-  return (req.headers.get("x-forwarded-for") ?? "anon").split(",")[0]!.trim() || "anon";
-}
-
 /**
  * Returns a 429 response if the caller is over the limit, else null (proceed).
  * Fails open on limiter errors — availability over strictness for a demo.
@@ -40,7 +37,7 @@ export async function rateLimited(req: Request): Promise<NextResponse | null> {
   const rl = limiter();
   if (!rl) return null;
   try {
-    const { success, reset } = await rl.limit(clientIp(req));
+    const { success, reset } = await rl.limit(clientIp(req.headers));
     if (success) return null;
     const retryAfter = Math.max(1, Math.ceil((reset - Date.now()) / 1000));
     return NextResponse.json(

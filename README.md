@@ -207,6 +207,15 @@ the LLM bridge + cassette, and a full **replay** run (seeded demo, no model
 attached). Each test self-skips if its dependency (Docker image / `DATABASE_URL`)
 is absent.
 
+## Observability & cost
+
+Structured JSON logging (pino) is always on. The funnel — upload → question →
+run → chart, plus errors — flows through one observability seam that logs and,
+when `POSTHOG_KEY` is set, sends to PostHog (a Sentry sink drops in the same
+way); no key → logs only, so nothing external is required. Every run records its
+token usage, and `/usage` (or `/api/usage`) shows live unit economics — analyses,
+success rate, avg duration, tokens, and estimated cost.
+
 ## Measured quality — the eval harness
 
 `npm run eval` runs the real loop over a golden set and scores **execution-based

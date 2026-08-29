@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@grounded/core"],
   // Server Actions / route handlers do the DB + Redis work; keep pg/ioredis
   // external so they are required at runtime in the Node server, not bundled.
-  serverExternalPackages: ["pg", "ioredis", "drizzle-orm"],
+  serverExternalPackages: ["pg", "ioredis", "drizzle-orm", "pino", "posthog-node"],
 };
 
 export default nextConfig;
