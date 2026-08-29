@@ -21,7 +21,7 @@ export default function Landing() {
         <nav className="flex items-center gap-5 text-sm text-ink/70">
           <a href={ARCHITECTURE} className="hidden hover:text-ink sm:inline">Notes</a>
           <a href={REPO} className="hidden hover:text-ink sm:inline">Code</a>
-          <Link href="/app" className="rounded-lg border border-line px-4 py-2 font-medium text-ink/80 hover:border-ink/30">
+          <Link href="/app" prefetch={false} className="rounded-lg border border-line px-4 py-2 font-medium text-ink/80 hover:border-ink/30">
             Open the exploration →
           </Link>
         </nav>
@@ -37,7 +37,7 @@ export default function Landing() {
           A few ideas — explored in working code, not slides. A point of view, offered as a conversation.
         </p>
         <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-          <Link href="/app" className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white">
+          <Link href="/app" prefetch={false} className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white">
             See the exploration →
           </Link>
           <a href={ARCHITECTURE} className="rounded-lg border border-line px-5 py-2.5 text-sm font-medium text-ink/80 hover:border-ink/30">
@@ -97,7 +97,7 @@ export default function Landing() {
             the agent surface and the eval. Narrow by design; think of it as notes you can click through.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            <Link href="/app" className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white">
+            <Link href="/app" prefetch={false} className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white">
               Open the exploration →
             </Link>
             <a href={ARCHITECTURE} className="rounded-lg border border-line px-5 py-2.5 text-sm font-medium text-ink/80 hover:border-ink/30">

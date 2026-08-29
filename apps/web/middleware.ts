@@ -24,10 +24,22 @@ export function middleware(req: NextRequest) {
   if (basicAuthOk(req.headers.get("authorization"), user, password)) {
     return NextResponse.next();
   }
-  return new NextResponse("Authentication required.", {
-    status: 401,
-    headers: { "WWW-Authenticate": 'Basic realm="Julius clone", charset="UTF-8"' },
-  });
+
+  // Only real top-level navigations should trigger the browser's native login
+  // dialog. Background prefetch/RSC/fetch subrequests (e.g. Next prefetching
+  // /app while the visitor is still reading the public landing) get a plain 401
+  // with NO WWW-Authenticate header — so the login box never pops unbidden.
+  const isDocumentNav =
+    req.headers.get("sec-fetch-dest") === "document" &&
+    req.headers.get("sec-fetch-mode") === "navigate" &&
+    req.headers.get("next-router-prefetch") !== "1" &&
+    req.headers.get("sec-purpose") !== "prefetch";
+
+  const headers: Record<string, string> = {};
+  if (isDocumentNav) {
+    headers["WWW-Authenticate"] = 'Basic realm="Julius clone", charset="UTF-8"';
+  }
+  return new NextResponse("Authentication required.", { status: 401, headers });
 }
 
 // Gate everything except Next's static assets and the favicon.
