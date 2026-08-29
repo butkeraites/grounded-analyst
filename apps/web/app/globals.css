@@ -3,12 +3,29 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 body {
-  background-color: theme("colors.paper");
-  color: theme("colors.ink");
+  background-color: #0a0f1c;
+  color: #eef2fb;
+  /* BIS brand glows */
+  background-image:
+    radial-gradient(900px 500px at 78% -8%, rgba(255, 71, 87, 0.12), transparent 60%),
+    radial-gradient(760px 480px at 8% 6%, rgba(91, 155, 255, 0.1), transparent 55%);
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(255, 71, 87, 0.28);
+}
+
+/* BIS brand gradient text */
+.grad-brand {
+  background: linear-gradient(100deg, #ff6b5f 0%, #ff4757 45%, #ff8a4c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
