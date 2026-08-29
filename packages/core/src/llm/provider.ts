@@ -32,9 +32,11 @@ export interface LLMProvider {
 
   /**
    * Write a prose interpretation grounded strictly in executed output.
-   * Must not introduce any number the code did not produce.
+   * Must not introduce any number the code did not produce. If `onToken` is
+   * given, the provider MAY stream the answer chunk-by-chunk as it's generated
+   * (providers that can't stream simply ignore it and return the full text).
    */
-  interpret(question: string, stdout: string): Promise<string>;
+  interpret(question: string, stdout: string, onToken?: (chunk: string) => void): Promise<string>;
 }
 
 /** Optionally implemented by providers that can report token usage (for cost). */
