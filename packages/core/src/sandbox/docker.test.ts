@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
@@ -35,6 +35,10 @@ before(() => {
   if (!READY) return;
   dir = mkdtempSync(join(tmpdir(), "julius-sbx-"));
   writeFileSync(join(dir, "sales.csv"), CSV);
+  // The sandbox runs as an unprivileged user; make the dir + file readable to it
+  // (mkdtemp is 700 on Linux, which would block uid 65534).
+  chmodSync(dir, 0o755);
+  chmodSync(join(dir, "sales.csv"), 0o644);
 });
 
 function sandbox() {

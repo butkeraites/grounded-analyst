@@ -1,4 +1,4 @@
-import { access, mkdir, readFile, writeFile } from "node:fs/promises";
+import { access, chmod, mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { Storage } from "./client.js";
 
@@ -18,7 +18,13 @@ export class LocalStorage implements Storage {
 
   async put(key: string, bytes: Uint8Array): Promise<string> {
     await mkdir(this.baseDir, { recursive: true });
-    await writeFile(this.full(key), bytes);
+    const path = this.full(key);
+    await writeFile(path, bytes);
+    // The sandbox mounts this dir read-only and runs as an unprivileged user
+    // (uid 65534); it must be able to traverse the dir and read the file, so
+    // force world-readable perms (host umask may otherwise make them 700/600).
+    await chmod(this.baseDir, 0o755).catch(() => {});
+    await chmod(path, 0o644).catch(() => {});
     return key;
   }
 
