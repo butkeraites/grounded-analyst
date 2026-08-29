@@ -1,40 +1,103 @@
 "use client";
 
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
 import type { Artifact, Message } from "./types";
 
-function ChartArtifact({ artifact }: { artifact: Extract<Artifact, { kind: "chart" }> }) {
-  // eslint-disable-next-line @next/next/no-img-element
+/** Markdown interpretation, styled without the typography plugin. */
+function Prose({ children }: { children: string }) {
   return (
-    <img
-      alt="Generated chart"
-      src={`data:${artifact.mimeType};base64,${artifact.data}`}
-      className="max-w-full rounded-lg border border-ink/10 bg-white"
-    />
+    <div className="space-y-2 leading-relaxed text-ink/90">
+      <ReactMarkdown
+        components={{
+          p: ({ children }) => <p>{children}</p>,
+          strong: ({ children }) => <strong className="font-semibold text-ink">{children}</strong>,
+          ul: ({ children }) => <ul className="list-disc space-y-1 pl-5">{children}</ul>,
+          ol: ({ children }) => <ol className="list-decimal space-y-1 pl-5">{children}</ol>,
+          h1: ({ children }) => <h3 className="text-base font-semibold">{children}</h3>,
+          h2: ({ children }) => <h3 className="text-base font-semibold">{children}</h3>,
+          h3: ({ children }) => <h4 className="font-semibold">{children}</h4>,
+          code: ({ children }) => <code className="rounded bg-ink/5 px-1 py-0.5 font-mono text-[0.85em]">{children}</code>,
+          a: ({ children, href }) => (
+            <a href={href} className="text-accent underline-offset-2 hover:underline">{children}</a>
+          ),
+        }}
+      >
+        {children}
+      </ReactMarkdown>
+    </div>
   );
 }
 
-function TableArtifact({ artifact }: { artifact: Extract<Artifact, { kind: "table" }> }) {
+function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) {
+  const [copied, setCopied] = useState(false);
   return (
-    <div className="overflow-x-auto rounded-lg border border-ink/10 bg-white">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="text-left text-xs uppercase tracking-wide text-ink/40">
-            {artifact.columns.map((c) => (
-              <th key={c} className="px-3 py-2 font-medium">{c}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {artifact.rows.slice(0, 50).map((row, i) => (
-            <tr key={i} className="border-t border-ink/5">
-              {row.map((cell, j) => (
-                <td key={j} className="px-3 py-2 tabular-nums text-ink/80">{String(cell)}</td>
+    <button
+      onClick={() => {
+        navigator.clipboard?.writeText(text).then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1200);
+        });
+      }}
+      className="text-ink/40 transition hover:text-ink"
+    >
+      {copied ? "Copied ✓" : label}
+    </button>
+  );
+}
+
+function ChartArtifact({ artifact }: { artifact: Extract<Artifact, { kind: "chart" }> }) {
+  const src = `data:${artifact.mimeType};base64,${artifact.data}`;
+  return (
+    <figure className="overflow-hidden rounded-lg border border-ink/10 bg-white">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img alt="Generated chart" src={src} className="max-w-full" />
+      <figcaption className="flex justify-end border-t border-ink/10 px-3 py-1.5 text-xs">
+        <a href={src} download="chart.png" className="text-ink/40 hover:text-ink">
+          Download PNG
+        </a>
+      </figcaption>
+    </figure>
+  );
+}
+
+function toCsv(columns: string[], rows: Array<Array<string | number | boolean | null>>): string {
+  const esc = (v: unknown) => {
+    const s = String(v ?? "");
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  return [columns.map(esc).join(","), ...rows.map((r) => r.map(esc).join(","))].join("\n");
+}
+
+function TableArtifact({ artifact }: { artifact: Extract<Artifact, { kind: "table" }> }) {
+  const csvHref = `data:text/csv;charset=utf-8,${encodeURIComponent(toCsv(artifact.columns, artifact.rows))}`;
+  return (
+    <div className="overflow-hidden rounded-lg border border-ink/10 bg-white">
+      <div className="max-h-80 overflow-auto">
+        <table className="w-full text-sm">
+          <thead className="sticky top-0 bg-white">
+            <tr className="text-left text-xs uppercase tracking-wide text-ink/40">
+              {artifact.columns.map((c) => (
+                <th key={c} className="border-b border-ink/10 px-3 py-2 font-medium">{c}</th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {artifact.rows.slice(0, 200).map((row, i) => (
+              <tr key={i} className="border-t border-ink/5">
+                {row.map((cell, j) => (
+                  <td key={j} className="px-3 py-2 tabular-nums text-ink/80">{String(cell)}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="flex justify-end border-t border-ink/10 px-3 py-1.5 text-xs">
+        <a href={csvHref} download="table.csv" className="text-ink/40 hover:text-ink">
+          Download CSV
+        </a>
+      </div>
     </div>
   );
 }
@@ -51,13 +114,12 @@ export function AssistantTurn({ message }: { message: Extract<Message, { role: "
   }
 
   if (!message.result) {
-    // Interpretation tokens are streaming in — render them live with a caret.
     if (message.streamed) {
       return (
-        <p className="leading-relaxed text-ink/90">
-          {message.streamed}
+        <div>
+          <Prose>{message.streamed}</Prose>
           <span className="ml-0.5 animate-pulse text-accent">▍</span>
-        </p>
+        </div>
       );
     }
     return (
@@ -74,11 +136,11 @@ export function AssistantTurn({ message }: { message: Extract<Message, { role: "
 
   return (
     <div className="space-y-4">
-      <p className="leading-relaxed text-ink/90">{result.interpretation}</p>
+      <Prose>{result.interpretation}</Prose>
       {charts.map((c, i) => <ChartArtifact key={i} artifact={c} />)}
       {tables.map((t, i) => <TableArtifact key={i} artifact={t} />)}
 
-      <div className="text-xs">
+      <div className="flex items-center gap-4 text-xs">
         <button
           onClick={() => setShowCode((v) => !v)}
           className="text-ink/50 underline-offset-4 hover:text-ink hover:underline"
@@ -86,12 +148,13 @@ export function AssistantTurn({ message }: { message: Extract<Message, { role: "
           {showCode ? "Hide code" : "Show code"}
           {result.repairAttempts > 0 && ` · ${result.repairAttempts} repair${result.repairAttempts > 1 ? "s" : ""}`}
         </button>
-        {showCode && (
-          <pre className="mt-2 overflow-x-auto rounded-lg border border-ink/10 bg-ink/[0.03] p-4 font-mono text-xs leading-relaxed text-ink/80">
-            {result.code}
-          </pre>
-        )}
+        {showCode && <CopyButton text={result.code} label="Copy code" />}
       </div>
+      {showCode && (
+        <pre className="overflow-x-auto rounded-lg border border-ink/10 bg-ink/[0.03] p-4 font-mono text-xs leading-relaxed text-ink/80">
+          {result.code}
+        </pre>
+      )}
     </div>
   );
 }
