@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Logo, LogoMark } from "./_components/brand/Logo";
 import { LoopDiagram } from "./_components/marketing/LoopDiagram";
 import { IdeaExplorer } from "./_components/marketing/IdeaExplorer";
+import { StackDiagram } from "./_components/marketing/StackDiagram";
 
 const REPO = "https://github.com/butkeraites/julius-clone";
 const ARCHITECTURE = `${REPO}/blob/main/docs/ARCHITECTURE.md`;
@@ -46,6 +47,15 @@ export default function Landing() {
       {/* The loop — diagram, almost no text */}
       <section className="mx-auto max-w-2xl px-6 py-8">
         <LoopDiagram />
+      </section>
+
+      {/* The architecture — interactive stack diagram */}
+      <section className="mx-auto max-w-3xl px-6 pb-2 pt-10 text-center">
+        <Eyebrow>Built with your stack</Eyebrow>
+        <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">The architecture, one tap at a time</h2>
+      </section>
+      <section className="mx-auto max-w-3xl px-6 py-6">
+        <StackDiagram />
       </section>
 
       {/* Positioning — one line */}
