@@ -39,6 +39,7 @@ function fakeRepos() {
       async get() { return { id: "conv1", datasetId: dataset.id, title: null, createdAt: new Date() }; },
       async listByDataset() { return []; },
       async list() { return []; },
+      async listSummaries() { return []; },
     },
     messages: {
       async add(input: { conversationId: string; role: "user" | "assistant"; content: string }) {

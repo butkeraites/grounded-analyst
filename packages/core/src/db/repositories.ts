@@ -42,11 +42,21 @@ export interface DatasetRepo {
   get(id: string): Promise<Dataset | null>;
   list(): Promise<Dataset[]>;
 }
+/** A conversation summarised for the history sidebar (title = its first question). */
+export interface ConversationSummary {
+  id: string;
+  datasetId: string;
+  createdAt: Date;
+  title: string | null;
+}
+
 export interface ConversationRepo {
   create(input: { datasetId: string; title?: string }): Promise<ConversationRow>;
   get(id: string): Promise<ConversationRow | null>;
   listByDataset(datasetId: string): Promise<ConversationRow[]>;
   list(): Promise<ConversationRow[]>;
+  /** One query (no N+1) for the history sidebar — safe under Neon connection limits. */
+  listSummaries(limit?: number): Promise<ConversationSummary[]>;
 }
 export interface MessageRepo {
   add(input: { conversationId: string; role: "user" | "assistant"; content: string }): Promise<MessageRow>;
@@ -138,6 +148,18 @@ export function makeRepositories(db: Db): Repositories {
       },
       async list(): Promise<ConversationRow[]> {
         return db.select().from(conversations).orderBy(desc(conversations.createdAt));
+      },
+      async listSummaries(limit = 50): Promise<ConversationSummary[]> {
+        const res = await db.execute(sql`
+          select c.id, c.dataset_id as "datasetId", c.created_at as "createdAt",
+            (select m.content from ${messages} m
+               where m.conversation_id = c.id and m.role = 'user'
+               order by m.created_at asc limit 1) as title
+          from ${conversations} c
+          order by c.created_at desc
+          limit ${limit}
+        `);
+        return res.rows as unknown as ConversationSummary[];
       },
     },
 
