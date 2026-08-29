@@ -65,6 +65,7 @@ export interface RunRepo {
   create(input: { conversationId: string; datasetId: string; question: string }): Promise<RunRow>;
   complete(id: string, patch: RunCompletion): Promise<RunRow>;
   get(id: string): Promise<RunRow | null>;
+  listByConversation(conversationId: string): Promise<RunRow[]>;
   usageStats(): Promise<UsageStats>;
 }
 export interface Repositories {
@@ -204,6 +205,9 @@ export function makeRepositories(db: Db): Repositories {
       async get(id: string): Promise<RunRow | null> {
         const [row] = await db.select().from(runs).where(eq(runs.id, id)).limit(1);
         return row ?? null;
+      },
+      async listByConversation(conversationId: string): Promise<RunRow[]> {
+        return db.select().from(runs).where(eq(runs.conversationId, conversationId)).orderBy(runs.createdAt);
       },
       async usageStats(): Promise<UsageStats> {
         const [r] = await db
