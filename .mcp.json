@@ -4,11 +4,15 @@
       "command": "npx",
       "args": ["tsx", "apps/mcp/src/server.ts"],
       "env": {
-        "DATABASE_URL": "postgres://grounded:grounded@localhost:5432/grounded",
-        "REDIS_URL": "redis://localhost:6379",
-        "DATASETS_DIR": "./.data",
-        "SANDBOX_IMAGE": "grounded-sandbox:latest",
-        "CASSETTE_PATH": "seed/cassette.sales.json"
+        "DATABASE_URL": "${DATABASE_URL:-postgres://grounded:grounded@localhost:5432/grounded}",
+        "REDIS_URL": "${REDIS_URL:-redis://localhost:6379}",
+        "DATASETS_DIR": "${DATASETS_DIR:-./.data}",
+        "SANDBOX_IMAGE": "${SANDBOX_IMAGE:-grounded-sandbox:latest}",
+        "CASSETTE_PATH": "${CASSETTE_PATH:-seed/cassette.sales.json}",
+        "E2B_API_KEY": "${E2B_API_KEY:-}",
+        "LLM_BASE_URL": "${LLM_BASE_URL:-}",
+        "LLM_API_KEY": "${LLM_API_KEY:-}",
+        "LLM_MODEL": "${LLM_MODEL:-}"
       }
     }
   }
