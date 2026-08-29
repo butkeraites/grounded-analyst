@@ -11,8 +11,9 @@
     "build:core": "npm run build --workspace @grounded/core",
     "dev": "npm run dev --workspace web",
     "lint": "npm run lint --workspace web",
-    "typecheck": "npm run build --workspace @grounded/core && npm run typecheck --workspace web",
+    "typecheck": "npm run build --workspace @grounded/core && npm run typecheck --workspace web && npm run typecheck --workspace mcp && npm run typecheck --workspace @grounded/eval",
     "test": "npm test --workspace @grounded/core",
+    "eval": "npm run eval --workspace @grounded/eval",
     "mcp": "npm run start --workspace mcp",
     "cli:analyze": "tsx packages/core/src/cli/analyze.ts",
     "cli:worker": "tsx packages/core/src/cli/worker.ts"

@@ -30,6 +30,8 @@ export interface RunCompletion {
   stderr?: string;
   repairAttempts?: number;
   durationMs?: number;
+  promptTokens?: number;
+  completionTokens?: number;
   artifacts?: Artifact[];
   messageId?: string;
 }
@@ -180,6 +182,8 @@ export function makeRepositories(db: Db): Repositories {
             stderr: patch.stderr,
             repairAttempts: patch.repairAttempts ?? 0,
             durationMs: patch.durationMs,
+            promptTokens: patch.promptTokens,
+            completionTokens: patch.completionTokens,
             artifacts: patch.artifacts,
             messageId: patch.messageId,
           })

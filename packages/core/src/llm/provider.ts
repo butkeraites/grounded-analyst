@@ -1,4 +1,4 @@
-import type { DatasetProfile, LLMConfig } from "../types.js";
+import type { DatasetProfile, LLMConfig, TokenUsage } from "../types.js";
 import { NotImplementedError } from "../errors.js";
 import { OpenAICompatibleLLMProvider } from "./openai-compatible.js";
 
@@ -35,6 +35,15 @@ export interface LLMProvider {
    * Must not introduce any number the code did not produce.
    */
   interpret(question: string, stdout: string): Promise<string>;
+}
+
+/** Optionally implemented by providers that can report token usage (for cost). */
+export interface UsageAware {
+  getUsage(): TokenUsage;
+}
+
+export function hasUsage(provider: unknown): provider is UsageAware {
+  return typeof (provider as UsageAware | null)?.getUsage === "function";
 }
 
 /**

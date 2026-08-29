@@ -83,6 +83,12 @@ export interface AnalysisRequest {
   llm?: Partial<LLMConfig>;
 }
 
+/** LLM token usage for a turn — the basis for cost accounting. */
+export interface TokenUsage {
+  promptTokens: number;
+  completionTokens: number;
+}
+
 /** The generated Python for a turn, plus how it ran. */
 export interface CodeExecution {
   code: string;

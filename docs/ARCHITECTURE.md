@@ -117,6 +117,12 @@ shape; or a managed remote sandbox (E2B/Modal) so the app never touches a daemon
 at all. Locally, the socket mount is the honest price of real execution on one
 machine.
 
+**Dev↔prod isolation parity.** Production already uses the managed‑sandbox option
+above — E2B, with no Docker socket. And the E2B adapter now passes
+`allowInternetAccess: false`, so the prod sandbox blocks network egress the same
+way the Docker path's `--network none` does (tested in both adapters). Earlier
+the prod path had internet by default; that asymmetry is closed.
+
 ---
 
 ## 3. The code‑gen → execute → interpret loop
@@ -160,10 +166,11 @@ the bridge, replayed with the real code re‑executing in the sandbox.
 
 **Honest limits.** (a) A blocking `analyze` triggered by the same agent that
 would answer it deadlocks — so the UI drives while a *separate* worker answers;
-this is documented, not incidental. (b) The public URL can't depend on a live
-model, hence the cassette; a real `openai-compatible` adapter is the drop‑in for
-arbitrary questions and is deliberately not yet wired (BYO stays a config
-choice, not a baked‑in vendor).
+this is documented, not incidental. (b) The `openai-compatible` adapter is now
+wired (`resolveProvider`) and runs in production against Groq (and locally against
+Ollama) for arbitrary questions; the cassette is used only for the seeded,
+zero-dependency demo path. The adapter has a request timeout + retry/backoff on
+429/5xx, and records token usage per turn for cost accounting.
 
 ---
 
@@ -204,7 +211,32 @@ record of every code‑gen→execute, which is what proves a number came from
 executed code. The schema and repositories live **in the core**, not in the web
 app, so the MCP server reuses them with zero duplicated query logic. Locally
 it's an official `postgres:16` container; "Vercel Postgres / Neon" is the same
-Postgres over the wire, so only the connection string changes at deploy.
+Postgres over the wire, so only the connection string changes at deploy. Each
+`runs` row also carries `prompt_tokens`/`completion_tokens` — the basis for
+cost‑per‑analysis accounting.
+
+---
+
+## 7.5 Measured quality — the eval harness + CI
+
+For an AI data analyst, "it works" is a claim you must *measure*, not assert.
+`packages/eval` runs the real loop over a golden set and scores two things:
+
+- **Correctness (execution‑based):** do the expected values appear in the
+  *executed* output (stdout + result table)? This checks the generated code
+  computed the right thing over the real data — not that the model sounded right.
+- **Faithfulness (grounding):** is every substantive *data figure* in the written
+  interpretation present in the executed output? This turns the "never fabricate"
+  principle from a code‑path guarantee into a *measured* property. (Derived
+  percentages are excluded — requiring them verbatim would be pedantic, not
+  meaningful; building the metric surfaced exactly this nuance.)
+
+It runs in two modes: a deterministic **cassette** mode (recorded output + local
+Docker sandbox — $0, used as the CI gate) and a **live** mode (real model, e.g.
+Groq) for model/prompt comparison. `npm run eval` prints a scorecard and exits
+non‑zero below threshold. **CI** (`.github/workflows/ci.yml`) gates every PR:
+typecheck (all four workspaces) + lint + build + tests + the eval regression gate,
+all free — no paid APIs are called in CI.
 
 ---
 
