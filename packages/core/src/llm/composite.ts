@@ -42,11 +42,11 @@ export class CompositeLLMProvider implements LLMProvider, UsageAware {
     }
   }
 
-  async interpret(question: string, stdout: string): Promise<string> {
+  async interpret(question: string, stdout: string, onToken?: (chunk: string) => void): Promise<string> {
     try {
-      return await this.primary.interpret(question, stdout);
+      return await this.primary.interpret(question, stdout, onToken);
     } catch (err) {
-      if (this.isMiss(err)) return this.fallback.interpret(question, stdout);
+      if (this.isMiss(err)) return this.fallback.interpret(question, stdout, onToken);
       throw err;
     }
   }

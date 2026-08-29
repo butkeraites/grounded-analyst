@@ -39,7 +39,10 @@ export async function POST(req: Request) {
       try {
         const result = await service.analyze(
           { datasetId, question, conversationId },
-          { onPhase: (e) => send("phase", e) },
+          {
+            onPhase: (e) => send("phase", e),
+            onToken: (chunk) => send("token", { chunk }),
+          },
         );
         analytics.capture("analysis_completed", {
           datasetId,

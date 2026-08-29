@@ -43,6 +43,8 @@ export type AnalyzePhase =
 
 export interface AnalyzeHooks {
   onPhase?: (event: AnalyzePhase) => void;
+  /** Called with each interpretation token as it streams (when the model supports it). */
+  onToken?: (chunk: string) => void;
 }
 
 export interface CoreService {
@@ -177,7 +179,7 @@ export function createCoreService(deps: CoreDeps): CoreService {
       emit({ phase: "interpreting" });
       const evidence = execution.stdout.trim() ? execution.stdout : describeArtifacts(execution.artifacts);
       const interpretation = evidence.trim()
-        ? await llm.interpret(request.question, evidence)
+        ? await llm.interpret(request.question, evidence, hooks?.onToken)
         : "Done — the requested output was generated.";
       const assistant = await repos.messages.add({
         conversationId: conversation.id,
