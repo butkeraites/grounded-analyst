@@ -39,6 +39,7 @@ function fakeRepos() {
       async get() { return { id: "conv1", datasetId: dataset.id, title: null, createdAt: new Date() }; },
       async listByDataset() { return []; },
       async list() { return []; },
+      async listSummaries() { return []; },
     },
     messages: {
       async add(input: { conversationId: string; role: "user" | "assistant"; content: string }) {
@@ -54,6 +55,7 @@ function fakeRepos() {
         return { id, conversationId: "conv1", datasetId: dataset.id, messageId: null, question: "q", status: patch.status, code: null, stdout: null, stderr: null, repairAttempts: patch.repairAttempts ?? 0, durationMs: null, artifacts: null, createdAt: new Date() };
       },
       async get() { return null; },
+      async listByConversation() { return []; },
       async usageStats() { return { analyses: 0, successes: 0, avgDurationMs: 0, promptTokens: 0, completionTokens: 0 }; },
     },
   } satisfies Repositories;
