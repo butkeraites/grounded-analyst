@@ -196,11 +196,12 @@ table, and chart end‑to‑end, unattended.
 then a final `result` (prose + chart + table + code) or `error`. `analyze`
 accepts an `onPhase` hook so the transport stays dumb.
 
-**Honest scope.** This is **phase‑level**, not token‑level, streaming — the
-cassette and the bridge have no token stream to forward. Token streaming is a
-per‑provider concern that lands with the `openai-compatible` adapter; the SSE
-plumbing and the UI reader already handle incremental events, so it's an adapter
-change, not a rework.
+**Token‑level too.** On top of the phase events, the interpretation now streams
+**token‑by‑token** when the provider supports it: `interpret` takes an optional
+`onToken`, the `openai-compatible` adapter reads the model's SSE deltas
+(Groq/Ollama), the route forwards them as `token` events, and the UI types them
+out live. Providers that can't stream (the cassette, the bridge) just return the
+full text — the same seam, degrading gracefully.
 
 ---
 

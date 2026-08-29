@@ -29,4 +29,11 @@ export interface AssistantResult {
 
 export type Message =
   | { id: string; role: "user"; content: string }
-  | { id: string; role: "assistant"; status?: string; result?: AssistantResult; error?: string };
+  | {
+      id: string;
+      role: "assistant";
+      status?: string;
+      streamed?: string;
+      result?: AssistantResult;
+      error?: string;
+    };

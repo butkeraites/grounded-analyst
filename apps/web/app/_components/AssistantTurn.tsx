@@ -51,6 +51,15 @@ export function AssistantTurn({ message }: { message: Extract<Message, { role: "
   }
 
   if (!message.result) {
+    // Interpretation tokens are streaming in — render them live with a caret.
+    if (message.streamed) {
+      return (
+        <p className="leading-relaxed text-ink/90">
+          {message.streamed}
+          <span className="ml-0.5 animate-pulse text-accent">▍</span>
+        </p>
+      );
+    }
     return (
       <div className="flex items-center gap-2 text-sm text-ink/50">
         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />

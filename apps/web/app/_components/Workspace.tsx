@@ -89,6 +89,7 @@ export function Workspace() {
           if (!evt || !data) continue;
           const payload = JSON.parse(data);
           if (evt === "phase") patch((x) => ({ ...x, status: PHASE_LABEL[payload.phase] ?? "Working…" }));
+          else if (evt === "token") patch((x) => ({ ...x, status: undefined, streamed: (x.streamed ?? "") + payload.chunk }));
           else if (evt === "result") patch((x) => ({ ...x, status: undefined, result: payload }));
           else if (evt === "error") patch((x) => ({ ...x, status: undefined, error: payload.message }));
         }
