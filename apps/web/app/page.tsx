@@ -4,6 +4,7 @@ import { LoopDiagram } from "./_components/marketing/LoopDiagram";
 import { IdeaExplorer } from "./_components/marketing/IdeaExplorer";
 import { StackDiagram } from "./_components/marketing/StackDiagram";
 import { CompareNotes } from "./_components/marketing/CompareNotes";
+import { EvolutionMap } from "./_components/marketing/EvolutionMap";
 
 const REPO = "https://github.com/butkeraites/grounded-analyst";
 const ARCHITECTURE = `${REPO}/blob/main/docs/ARCHITECTURE.md`;
@@ -71,6 +72,20 @@ export default function Landing() {
       {/* Interactive ideas */}
       <section className="mx-auto max-w-4xl px-6 py-6">
         <IdeaExplorer />
+      </section>
+
+      {/* Given more time — the bold, natural evolution */}
+      <section className="mx-auto max-w-3xl px-6 pb-2 pt-12 text-center">
+        <Eyebrow>Given more time</Eyebrow>
+        <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
+          Where this platform naturally goes
+        </h2>
+        <p className="mx-auto mt-3 max-w-lg text-ink/60">
+          The loop is the seed. Everything below grows toward one thing.
+        </p>
+      </section>
+      <section className="mx-auto max-w-3xl px-6 py-6">
+        <EvolutionMap />
       </section>
 
       {/* Exploration — compact */}
