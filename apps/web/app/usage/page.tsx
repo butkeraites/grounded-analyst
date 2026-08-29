@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="rounded-lg border border-ink/10 bg-white px-5 py-4">
+    <div className="rounded-lg border border-ink/10 bg-surface px-5 py-4">
       <div className="text-xs uppercase tracking-wide text-ink/40">{label}</div>
       <div className="mt-1 text-2xl font-semibold tabular-nums">{value}</div>
       {sub && <div className="mt-0.5 text-xs text-ink/50">{sub}</div>}

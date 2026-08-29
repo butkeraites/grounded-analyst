@@ -12,7 +12,7 @@ const DTYPE_LABEL: Record<string, string> = {
 /** A column-profile table — types, missing counts, and samples, at a glance. */
 export function ProfilePreview({ dataset }: { dataset: Dataset }) {
   return (
-    <div className="rounded-lg border border-ink/10 bg-white">
+    <div className="rounded-lg border border-ink/10 bg-surface">
       <div className="flex items-baseline justify-between px-4 py-3">
         <span className="font-medium">{dataset.name}</span>
         <span className="text-xs text-ink/50">

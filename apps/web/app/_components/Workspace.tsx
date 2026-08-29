@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { AssistantTurn } from "./AssistantTurn";
 import { ProfilePreview } from "./ProfilePreview";
+import { Logo } from "./brand/Logo";
 import type { Dataset, Message } from "./types";
 
 const PHASE_LABEL: Record<string, string> = {
@@ -169,13 +170,13 @@ export function Workspace() {
     <div className="flex min-h-screen">
       {/* Sidebar */}
       <aside className="hidden w-64 shrink-0 flex-col border-r border-ink/10 bg-ink/[0.02] px-3 py-4 md:flex">
-        <div className="px-2">
-          <p className="text-xs font-medium uppercase tracking-widest text-accent">Grounded clone</p>
-          <p className="text-sm font-semibold tracking-tight">AI data analyst</p>
-        </div>
+        <Link href="/" className="block px-2">
+          <Logo height={22} />
+          <p className="mt-1 text-xs text-ink/40">AI data analyst</p>
+        </Link>
         <button
           onClick={newAnalysis}
-          className="mt-4 rounded-md border border-ink/15 bg-white px-3 py-2 text-left text-sm font-medium text-ink/80 hover:border-accent hover:text-accent"
+          className="mt-4 rounded-md border border-ink/15 bg-surface px-3 py-2 text-left text-sm font-medium text-ink/80 hover:border-accent hover:text-accent"
         >
           ＋ New analysis
         </button>
@@ -259,7 +260,7 @@ export function Workspace() {
               e.preventDefault();
               if (input.trim()) ask(input.trim());
             }}
-            className="flex items-end gap-2 rounded-2xl border border-ink/15 bg-white p-2 shadow-sm focus-within:border-accent"
+            className="flex items-end gap-2 rounded-2xl border border-ink/15 bg-surface p-2 shadow-sm focus-within:border-accent"
           >
             <label className="cursor-pointer rounded-lg p-2 text-ink/40 hover:bg-ink/5 hover:text-ink" title="Upload a CSV">
               <input

@@ -10,6 +10,13 @@ import { basicAuthOk } from "@/lib/auth";
  * and it activates only once the env var exists on the deployment.
  */
 export function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+  // The marketing landing (and its static assets) is public; only the app +
+  // APIs are gated. A founder reads the pitch freely, then logs in to try it.
+  if (pathname === "/" || /\.(png|svg|jpe?g|ico|webp|txt)$/.test(pathname)) {
+    return NextResponse.next();
+  }
+
   const password = process.env.SITE_PASSWORD;
   if (!password) return NextResponse.next();
 
