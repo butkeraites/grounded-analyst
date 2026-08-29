@@ -62,6 +62,7 @@ export {
   type Repositories,
   type DatasetRepo,
   type ConversationRepo,
+  type ConversationSummary,
   type MessageRepo,
   type RunRepo,
   type NewDataset,
