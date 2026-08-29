@@ -22,7 +22,8 @@
     "@e2b/code-interpreter": "^1.0.0",
     "drizzle-orm": "^0.36.4",
     "ioredis": "^5.4.1",
-    "pg": "^8.13.1"
+    "pg": "^8.13.1",
+    "pino": "^9.5.0"
   },
   "devDependencies": {
     "@types/pg": "^8.11.10",

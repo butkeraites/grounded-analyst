@@ -57,6 +57,7 @@ export async function POST(req: Request) {
         });
       } catch (err) {
         analytics.capture("analysis_failed", { datasetId });
+        analytics.captureError(err, { route: "analyze", datasetId });
         send("error", { message: err instanceof Error ? err.message : String(err) });
       } finally {
         controller.close();

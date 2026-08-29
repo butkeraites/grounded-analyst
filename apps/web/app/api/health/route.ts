@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { logger } from "@julius/core";
 import { pingDb } from "@/lib/db";
 import { pingRedis } from "@/lib/redis";
 
@@ -12,7 +13,7 @@ async function probe(fn: () => Promise<void>): Promise<Status> {
     await fn();
     return "ok";
   } catch (err) {
-    console.error("[health] probe failed:", err);
+    logger.warn({ err }, "health probe failed");
     return "error";
   }
 }
