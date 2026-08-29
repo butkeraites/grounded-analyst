@@ -45,7 +45,7 @@ export default async function HealthPage() {
         Live probe of the three local containers — the proof the pipe is wired
         end-to-end.
       </p>
-      <ul className="mt-8 rounded-lg border border-ink/10 bg-white px-5">
+      <ul className="mt-8 rounded-lg border border-ink/10 bg-surface px-5">
         <Row label="Web (Next.js)" up={web} />
         <Row label="Postgres" up={db} />
         <Row label="Redis" up={redis} />

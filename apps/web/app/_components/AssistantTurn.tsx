@@ -49,7 +49,7 @@ function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) 
 function ChartArtifact({ artifact }: { artifact: Extract<Artifact, { kind: "chart" }> }) {
   const src = `data:${artifact.mimeType};base64,${artifact.data}`;
   return (
-    <figure className="overflow-hidden rounded-lg border border-ink/10 bg-white">
+    <figure className="overflow-hidden rounded-lg border border-ink/10 bg-surface">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img alt="Generated chart" src={src} className="max-w-full" />
       <figcaption className="flex justify-end border-t border-ink/10 px-3 py-1.5 text-xs">
@@ -72,10 +72,10 @@ function toCsv(columns: string[], rows: Array<Array<string | number | boolean | 
 function TableArtifact({ artifact }: { artifact: Extract<Artifact, { kind: "table" }> }) {
   const csvHref = `data:text/csv;charset=utf-8,${encodeURIComponent(toCsv(artifact.columns, artifact.rows))}`;
   return (
-    <div className="overflow-hidden rounded-lg border border-ink/10 bg-white">
+    <div className="overflow-hidden rounded-lg border border-ink/10 bg-surface">
       <div className="max-h-80 overflow-auto">
         <table className="w-full text-sm">
-          <thead className="sticky top-0 bg-white">
+          <thead className="sticky top-0 bg-surface">
             <tr className="text-left text-xs uppercase tracking-wide text-ink/40">
               {artifact.columns.map((c) => (
                 <th key={c} className="border-b border-ink/10 px-3 py-2 font-medium">{c}</th>
