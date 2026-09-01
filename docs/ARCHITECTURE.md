@@ -187,6 +187,52 @@ makes an analyst‑over‑MCP *auditable and composable* instead of a black box.
 `example-agent` is the living proof: it uploads, asks, and pulls back the code,
 table, and chart end‑to‑end, unattended.
 
+### 5.1 Two transports, one tool surface
+
+**Decision.** The tools are registered once in `packages/mcp-server` and served
+over **two transports**: stdio (`apps/mcp`, for a local host) and **Streamable
+HTTP** (`apps/web/app/api/mcp`, for the deployment).
+
+**Why the HTTP one is not optional.** stdio only reaches someone who has cloned
+the repo and stood up Postgres, Redis, and Docker. The claim this project makes
+is that *an external agent can pilot the platform* — and a reviewer who opens the
+live URL can only verify that if the endpoint answers at a URL. Shipping the
+differentiator behind a local-only transport is shipping it to nobody. That was
+the actual state of this repo until the endpoint existed: a real gap, not a
+polish item.
+
+**What the second transport cost.** The tool logic: nothing. Extracting
+`packages/mcp-server` and pointing both entry points at it was the whole change,
+which is the seam from §1 paying out one level up — one core with many clients,
+and now one tool surface with many transports. Had the HTTP route needed its own
+copy of the tools, the seam would have been decoration.
+
+**Stateless by construction.** `sessionIdGenerator` is undefined and each POST
+builds a fresh server + transport. Vercel gives no sticky routing, so a session
+in one instance's memory would vanish on the next request; the SDK requires a
+fresh transport per request in this mode anyway. The cost is one initialize
+round‑trip per call — cheaper than the Redis session store the alternative
+needs, for tools that carry no session state. Responses come back as a single
+JSON body rather than an SSE stream: this surface sends no server‑initiated
+notifications, and a short response is what a serverless function can honour.
+The spec's `GET` (server→client stream) and `DELETE` (session teardown) return
+405 — left to the transport, `GET` opens an SSE stream that would never speak.
+
+**Threat model.** The endpoint runs LLM‑generated Python and calls a paid model,
+so it must never be more open than the site's own gate: it takes a bearer
+`MCP_TOKEN` (what an MCP host can send) *or* the Basic credentials that gate the
+web app (what a reviewer already holds), and is open only when neither is
+configured — which is exactly local dev. It shares the per‑IP rate limiter with
+the expensive web routes. The `llm_*` worker tools are deliberately **not**
+registered on HTTP: `llm_pull_request` blocks waiting for work, which a
+serverless function can only spend its wall clock on.
+
+**Tested at the protocol level.** `packages/mcp-server/src/http.test.ts` drives
+the real handler with a real MCP `Client`, asserting initialize → `tools/list` →
+`tools/call` over a fake core — including that a stateless transport is never
+reused, which is the failure mode that would otherwise only appear in
+production.
+
 ---
 
 ## 6. Streaming

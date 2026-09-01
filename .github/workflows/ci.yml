@@ -35,7 +35,7 @@ jobs:
       - name: Build the sandbox image
         run: docker build -t julius-sandbox:latest ./sandbox
 
-      - name: Typecheck (core + web + mcp + eval)
+      - name: Typecheck (core + web + mcp-server + mcp + eval)
         run: npm run typecheck
 
       - name: Lint
@@ -50,7 +50,10 @@ jobs:
       - name: Tests
         run: npm test --workspace @julius/core
 
-      - name: Web unit tests (auth gate, rate-limit)
+      - name: MCP transport tests (a real client over the HTTP handler)
+        run: npm test --workspace @julius/mcp-server
+
+      - name: Web unit tests (auth gate, rate-limit, MCP auth)
         run: npm test --workspace web
 
       - name: Grader unit tests
