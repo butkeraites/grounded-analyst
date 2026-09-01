@@ -59,7 +59,7 @@ function fakeDeps() {
     messages: { async listByConversation() { return []; } },
   } as unknown as Repositories;
 
-  return { deps: { service, repos }, calls };
+  return { deps: { service: () => service, repos: () => repos }, calls };
 }
 
 /**
@@ -145,6 +145,28 @@ test("http transport: a stateless transport is never reused across requests", as
   // SDK throws "Stateless transport cannot be reused across requests."
   await client.listTools();
   await client.listTools();
+  await client.close();
+});
+
+test("http transport: tools/list survives a core that cannot be built", async () => {
+  // A deployment with a missing DATABASE_URL used to answer every call — even
+  // discovery — with an opaque 500, so an agent couldn't even see the surface.
+  const broken = {
+    service: () => {
+      throw new Error("DATABASE_URL is not set");
+    },
+    repos: () => {
+      throw new Error("DATABASE_URL is not set");
+    },
+  };
+  const client = await connectedClient(broken);
+  assert.equal((await client.listTools()).tools.length, 9);
+
+  // ...and the tool that does need the core says what is actually wrong,
+  // instead of the transport swallowing it.
+  const res = await client.callTool({ name: "list_datasets", arguments: {} });
+  assert.equal(res.isError, true);
+  assert.match((res.content as Array<{ text: string }>)[0]!.text, /DATABASE_URL is not set/);
   await client.close();
 });
 

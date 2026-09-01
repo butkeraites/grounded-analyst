@@ -19,7 +19,7 @@ import { createJuliusMcpServer } from "@julius/mcp-server";
 const { service, repos } = createCoreServiceFromEnv();
 const bridge = new RedisLlmBridge(process.env.REDIS_URL ?? "redis://localhost:6379");
 
-const server = createJuliusMcpServer({ service, repos, bridge });
+const server = createJuliusMcpServer({ service: () => service, repos: () => repos, bridge });
 
 const transport = new StdioServerTransport();
 await server.connect(transport);

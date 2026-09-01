@@ -20,8 +20,17 @@ import type { CoreService, LlmBridge, Repositories } from "@julius/core";
  */
 
 export interface JuliusMcpDeps {
-  service: CoreService;
-  repos: Repositories;
+  /**
+   * The core, resolved lazily — `initialize` and `tools/list` are protocol
+   * traffic that touches no data, and an agent must be able to discover the
+   * surface even when the deployment's database is unreachable or its env is
+   * half-configured. Building the core eagerly turned a missing DATABASE_URL
+   * into an opaque 500 on every call, `tools/list` included. Resolved per tool
+   * invocation instead, so a broken core surfaces as a tool error naming the
+   * actual problem.
+   */
+  service: () => CoreService;
+  repos: () => Repositories;
   /**
    * The LLM bridge backing the worker tools. Optional: without it the analyst
    * tools still work (cassette replay or a configured BYO model), and the
@@ -57,7 +66,7 @@ export function createJuliusMcpServer({ service, repos, bridge }: JuliusMcpDeps)
       },
     },
     async ({ name, content }) => {
-      const dataset = await service.upload({
+      const dataset = await service().upload({
         name,
         contentType: "text/csv",
         bytes: new TextEncoder().encode(content),
@@ -75,7 +84,7 @@ export function createJuliusMcpServer({ service, repos, bridge }: JuliusMcpDeps)
     "list_datasets",
     { title: "List datasets", description: "Enumerate datasets with their shape.", inputSchema: {} },
     async () => {
-      const datasets = await repos.datasets.list();
+      const datasets = await repos().datasets.list();
       return text(
         datasets.map((d) => ({
           datasetId: d.id,
@@ -94,7 +103,7 @@ export function createJuliusMcpServer({ service, repos, bridge }: JuliusMcpDeps)
       description: "Starter questions derived from a dataset's profile.",
       inputSchema: { datasetId: z.string() },
     },
-    async ({ datasetId }) => text(await service.suggestQuestions(datasetId)),
+    async ({ datasetId }) => text(await service().suggestQuestions(datasetId)),
   );
 
   server.registerTool(
@@ -111,7 +120,7 @@ export function createJuliusMcpServer({ service, repos, bridge }: JuliusMcpDeps)
       },
     },
     async ({ datasetId, question, conversationId }) => {
-      const result = await service.analyze({ datasetId, question, conversationId });
+      const result = await service().analyze({ datasetId, question, conversationId });
       return text({
         runId: result.runId,
         conversationId: result.conversationId,
@@ -130,7 +139,7 @@ export function createJuliusMcpServer({ service, repos, bridge }: JuliusMcpDeps)
       inputSchema: { runId: z.string() },
     },
     async ({ runId }) => {
-      const run = await repos.runs.get(runId);
+      const run = await repos().runs.get(runId);
       if (!run) return text(`run not found: ${runId}`);
       return text(run.code ?? "(no code recorded)");
     },
@@ -144,7 +153,7 @@ export function createJuliusMcpServer({ service, repos, bridge }: JuliusMcpDeps)
       inputSchema: { runId: z.string() },
     },
     async ({ runId }) => {
-      const run = await repos.runs.get(runId);
+      const run = await repos().runs.get(runId);
       const table = run?.artifacts?.find((a) => a.kind === "table");
       return text(table ?? "(no table for this run)");
     },
@@ -158,7 +167,7 @@ export function createJuliusMcpServer({ service, repos, bridge }: JuliusMcpDeps)
       inputSchema: { runId: z.string() },
     },
     async ({ runId }) => {
-      const run = await repos.runs.get(runId);
+      const run = await repos().runs.get(runId);
       const chart = run?.artifacts?.find((a) => a.kind === "chart");
       if (!chart || chart.kind !== "chart") return text("(no chart for this run)");
       return { content: [{ type: "image" as const, data: chart.data, mimeType: chart.mimeType }] };
@@ -174,8 +183,8 @@ export function createJuliusMcpServer({ service, repos, bridge }: JuliusMcpDeps)
     },
     async ({ datasetId }) => {
       const rows = datasetId
-        ? await repos.conversations.listByDataset(datasetId)
-        : await repos.conversations.list();
+        ? await repos().conversations.listByDataset(datasetId)
+        : await repos().conversations.list();
       return text(rows.map((c) => ({ conversationId: c.id, datasetId: c.datasetId, createdAt: c.createdAt })));
     },
   );
@@ -188,7 +197,7 @@ export function createJuliusMcpServer({ service, repos, bridge }: JuliusMcpDeps)
       inputSchema: { conversationId: z.string() },
     },
     async ({ conversationId }) => {
-      const messages = await repos.messages.listByConversation(conversationId);
+      const messages = await repos().messages.listByConversation(conversationId);
       return text(messages.map((m) => ({ role: m.role, content: m.content })));
     },
   );

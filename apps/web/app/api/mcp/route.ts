@@ -39,14 +39,28 @@ export async function POST(req: Request): Promise<Response> {
 
   try {
     getAnalytics().capture("mcp_request");
+    // Passed as factories, not values: `initialize` and `tools/list` need no
+    // core, so a deployment with a missing DATABASE_URL still answers protocol
+    // traffic and reports the real problem from the tool that needed it.
     // No LLM bridge here: `llm_pull_request` blocks waiting for work, which a
     // serverless function can only burn its wall clock on. An MCP host that
     // wants to BE the model runs the stdio server against the same core.
-    return await handleMcpHttpRequest(req, { service: getService(), repos: repositories() });
+    return await handleMcpHttpRequest(req, { service: getService, repos: repositories });
   } catch (err) {
     getAnalytics().captureError(err, { route: "mcp" });
+    // The caller is already authenticated, and a bare "Internal server error"
+    // makes a misconfigured deployment undiagnosable from the client side —
+    // which is exactly the wall a reviewer hits first. Name the cause.
     return Response.json(
-      { jsonrpc: "2.0", error: { code: -32603, message: "Internal server error" }, id: null },
+      {
+        jsonrpc: "2.0",
+        error: {
+          code: -32603,
+          message: "Internal server error",
+          data: { reason: err instanceof Error ? err.message : String(err) },
+        },
+        id: null,
+      },
       { status: 500 },
     );
   }
