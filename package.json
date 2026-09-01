@@ -11,7 +11,7 @@
     "build:core": "npm run build --workspace @julius/core",
     "dev": "npm run dev --workspace web",
     "lint": "npm run lint --workspace web",
-    "typecheck": "npm run build --workspace @julius/core && npm run typecheck --workspace web && npm run typecheck --workspace mcp && npm run typecheck --workspace @julius/eval",
+    "typecheck": "npm run build --workspace @julius/core && npm run typecheck --workspace web && npm run typecheck --workspace @julius/mcp-server && npm run typecheck --workspace mcp && npm run typecheck --workspace @julius/eval",
     "test": "npm test --workspace @julius/core",
     "eval": "npm run eval --workspace @julius/eval",
     "mcp": "npm run start --workspace mcp",

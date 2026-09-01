@@ -66,7 +66,9 @@ If port 3000 is already taken, set `WEB_PORT` in `.env` (e.g. `WEB_PORT=3001`).
 
 ```
 apps/web/            Next.js UI + API (route handlers); lib/db delegates to the core
-apps/mcp/            MCP server — an MCP host can BE the platform's model (bridge worker tools)
+  app/api/mcp/       the MCP server over Streamable HTTP — the live deployment, pilotable by an agent
+apps/mcp/            the same MCP server over stdio, for a local host (+ the model-bridge worker tools)
+packages/mcp-server/ THE MCP tool surface — one set of tools, both transports
 packages/core/       THE core analyst service — one core, many clients (UI, MCP, CLI)
   src/service.ts     createCoreService(deps): upload + the analyze loop
   src/sandbox/       SandboxClient/Profiler ports + the DockerSandbox adapter
@@ -165,6 +167,30 @@ reimplementation:
 
 Exposing `get_code` — the generated Python, not just the answer — is what makes
 an analyst-over-MCP auditable and composable instead of a black box.
+
+### Connect an agent to the live deployment
+
+The tools are served over **two transports** — `POST /api/mcp` (Streamable HTTP)
+on the deployment, and stdio for a local stack — registered from one module
+(`packages/mcp-server`). A remote endpoint is the difference between "an agent
+*could* pilot this" and an agent piloting *this URL*, with nothing to install:
+
+```bash
+claude mcp add --transport http julius-clone https://<deployment>/api/mcp \
+  --header "Authorization: Bearer $MCP_TOKEN"
+```
+
+The endpoint is stateless (one server per request — Vercel offers no sticky
+routing) and authenticated: it accepts `Authorization: Bearer $MCP_TOKEN`, or the
+same Basic credentials that gate the web app, and is open only when neither is
+configured. The `llm_*` worker tools stay on stdio, where a long poll has a
+process to live in.
+
+The example agent runs against either transport, unchanged:
+
+```bash
+MCP_URL=https://<deployment>/api/mcp MCP_TOKEN=… npm run agent --workspace mcp
+```
 
 **Living proof:** an example agent drives a full analysis end-to-end over MCP —
 upload → ask → pull back the code, table, and chart — unattended:

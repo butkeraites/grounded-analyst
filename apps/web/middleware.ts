@@ -17,6 +17,12 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // The MCP endpoint runs its own gate (see lib/mcp-auth): an MCP host sends a
+  // bearer token, which this Basic check would reject before the route ever
+  // saw it. Skipping here does NOT open it — the route rejects an unauthorized
+  // caller with a JSON-RPC 401, and accepts these same Basic credentials too.
+  if (pathname === "/api/mcp") return NextResponse.next();
+
   const password = process.env.SITE_PASSWORD;
   if (!password) return NextResponse.next();
 
