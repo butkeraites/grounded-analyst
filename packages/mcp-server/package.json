@@ -15,10 +15,10 @@
   "dependencies": {
     "@julius/core": "*",
     "@modelcontextprotocol/sdk": "^1.30.0",
-    "zod": "^3.23.8"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
-    "typescript": "^5.6.0",
+    "typescript": "^7.0.2",
     "tsx": "^4.19.2"
   }
 }
