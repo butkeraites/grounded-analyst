@@ -8,7 +8,7 @@ const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono", disp
 export const metadata: Metadata = {
   title: "BIS — AI data analyst",
   description:
-    "An AI data analyst that runs the code — a production clone of Grounded's core on the exact stack, and further. By BIS · Butkeraites Intelligent Solutions.",
+    "An AI data analyst that runs the code — real Python in an isolated sandbox, grounded answers, an agent-drivable core. By BIS · Butkeraites Intelligent Solutions.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

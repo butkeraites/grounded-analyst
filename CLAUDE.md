@@ -1,39 +1,36 @@
-# Grounded Clone — Staff-Engineer Portfolio Build
+# Grounded — Staff-Engineer Reference Build
 
 ## Why this repo exists (read first)
 
-This is a **portfolio project to earn a referral** for a role at **Grounded**:
-
-> **Sr Full Stack Engineer (Contract)** — NextJS, React, TypeScript, Tailwind, Postgres, Vercel, Redis, PostHog · $7–9k/mo · 40 hrs/week · SF hours · contract, potential FTE.
-
-A recruiter has said she will refer the candidate **if he builds something real with Grounded's stack that she can share.** So the goal is NOT a big feature-complete product. The goal is a **small, deep, production-deployed vertical slice that reads as staff-level engineering** to a Grounded engineer looking at the repo and the live site.
+Grounded is a **deep, production-grade reference build of an AI data analyst**,
+engineered by BIS. It is a deliberate demonstration of staff-level judgment: not a
+broad feature-complete product, but a **small, deep, well-documented vertical
+slice** with the dangerous part — securely executing untrusted, LLM-generated code
+— solved for real.
 
 **The single sentence that governs every decision here:** *narrow scope, deep execution, the hard part solved for real, and the decisions documented.* Five half-features signal the opposite of staff. One impeccable end-to-end flow, with the dangerous part handled well and an architecture doc explaining the tradeoffs, is the signal.
 
-## The candidate (who this build represents)
+## Who built it
 
 Renan Butkeraites — PhD in Operations Research, ~10 years shipping **Python, ML, and optimization in production**; recently applied-AI / LLM systems (RAG, evaluation, redaction), builds with Claude Code daily.
 
-- **Real strength:** Python, data, code execution, systems thinking, LLM orchestration, architecture judgment. This is where he is genuinely staff-level.
-- **The gap to close:** the Grounded stack is **frontend-heavy** (Next.js/React/TS/Tailwind), which is his "also-shipped," not his interview-depth. This project must show he can **ship solid React/frontend fundamentals** (not vibecoding), while his backend/systems strength turns the hard part (the Python sandbox) from a risk into the differentiator.
+- **The strength on display:** Python, data, code execution, systems thinking, LLM orchestration, architecture judgment — with the hard part (the Python sandbox) turned from a risk into the differentiator, wrapped in clean, intentional React/TS/Tailwind that does not look AI-generated.
 
-Strategy in one line: **do not hide the frontend gap behind a mock — close it with clean React, and win on the sandbox + architecture where he is strongest.**
-
-## What Grounded actually is (clone target)
+## What Grounded is
 
 An **AI data analyst**: upload a dataset, ask a question in plain English, and it **writes and runs real Python**, then returns a **chart + a data table + a written interpretation, inline in the chat.** It is *not* the model guessing numbers — it executes pandas/matplotlib/statsmodels/scikit-learn in an **isolated container** and streams results back.
 
-**The core UX loop to clone (this is the whole MVP):**
+**The core UX loop (this is the whole MVP):**
 1. Clean workspace; **paperclip → upload a CSV/Excel**.
 2. On upload: render a **data-preview table** + **auto-generated suggested questions** derived from the columns.
 3. User types a question (bonus: a **`/` command menu**).
 4. Backend writes Python, runs it in a **sandbox**, and the assistant turn **streams** back three things: **(a) prose interpretation, (b) a rendered chart, (c) a result table.**
-5. A **"show code" toggle** exposes the generated Python (transparency is a Grounded selling point).
+5. A **"show code" toggle** exposes the generated Python (transparency is a core selling point).
 6. Follow-up questions keep **conversation context**; threads persist.
 
-**Deliberately OUT of scope** (name them in the ADR as "known extensions," do not build): Notebooks/templates, Models Lab, Slides/Tasks/Excel export, multi-model switching, live database connections, auth/billing, teams. Grounded's own known gaps (>50MB files, no live DB at entry tier) are things to *mention you'd add*, not build.
+**Deliberately OUT of scope** (name them in the ADR as "known extensions," do not build): Notebooks/templates, Models Lab, Slides/Tasks/Excel export, multi-model switching, live database connections, auth/billing, teams. Common category gaps (>50MB files, no live DB at entry tier) are things to *mention you'd add*, not build.
 
-## Required stack (match Grounded exactly — this is the point)
+## Stack
 
 | Layer | Use | Notes |
 |---|---|---|
@@ -41,11 +38,11 @@ An **AI data analyst**: upload a dataset, ask a question in plain English, and i
 | Styling | **Tailwind CSS** | Clean, intentional UI. See "UI taste" below — must NOT look AI-generated. |
 | DB | **Postgres** | Conversations, messages, datasets metadata, run records. Use Vercel Postgres or Neon. |
 | Cache/queue/realtime | **Redis** | Session state, run status, rate-limit, and/or pub-sub for streaming. Upstash works on Vercel. |
-| Deploy | **Vercel** | The app shell + API. **Must be a live URL** the recruiter can open. |
+| Deploy | **Vercel-ready** | The app shell + API deploy to Vercel; the sandbox and Postgres/Redis live off-Vercel. Source-available — runs 100% local via Docker, no hosted demo. |
 | Analytics | **PostHog** | Instrument the real funnel: upload → question → run → chart rendered. Show you measure. |
 | Python sandbox | a separate execution service | NOT on Vercel (long-running). See architecture. |
 
-Do not substitute technologies. Using their exact stack is what makes the referral land.
+A modern, widely-used product stack, chosen on purpose; the interesting engineering is the sandbox and the core seam, not the framework.
 
 ## Architecture — the hard part is the whole point
 
@@ -53,7 +50,7 @@ The interesting engineering problem, and the one that shows staff judgment, is *
 
 - **Execution:** run generated code in an **isolated sandbox** with no host access, a **timeout**, resource limits, and a per-session lifecycle (spin up, execute, tear down). Candidate options to evaluate in the ADR: **E2B**, **Modal**, a **Docker/Firecracker** worker, or a hardened local subprocess for the MVP. Pick one, justify it as *optimal vs. practical for an MVP*.
 - **Streaming:** the assistant turn must **stream** — prose tokens first, chart + table as the code finishes. Use **SSE or WebSocket**; wire it through a Route Handler / a small backend, with Redis as the pub-sub or status channel if it helps.
-- **The LLM step:** an orchestration layer that turns a natural-language question + the dataframe schema into runnable Python, then feeds execution results (and errors) back for interpretation. **This is where the candidate's LLM/agent experience shows** — grounding, error-repair loop (if the generated code throws, feed the traceback back and retry), and never letting the model fabricate a number it didn't compute.
+- **The LLM step:** an orchestration layer that turns a natural-language question + the dataframe schema into runnable Python, then feeds execution results (and errors) back for interpretation. **This is where LLM/agent engineering shows** — grounding, error-repair loop (if the generated code throws, feed the traceback back and retry), and never letting the model fabricate a number it didn't compute.
 - **Data flow:** upload → store + profile the dataset (types, missing values, shape) → schema informs both the suggested questions and the code-gen prompt.
 
 Write the code so a reviewer can see the **boundaries**: `app/` (UI), an API layer, a sandbox client, an LLM orchestration module, and a data/persistence layer. Clear seams are a staff signal.
@@ -62,9 +59,9 @@ Write the code so a reviewer can see the **boundaries**: `app/` (UI), an API lay
 
 ## Agent-drivable platform (MCP) — the differentiator
 
-**Research finding (2026-08-28):** Grounded is an MCP **client** — it *consumes* external MCP servers as data connectors — but it does **not** expose itself as an MCP server, and it has **no public API** ("Grounded itself cannot be called via API," per their docs). So **building a Grounded-as-MCP-server is a genuine gap you're filling**, in the exact direction Grounded already cares about. This is the strongest single pitch in the whole project: *"an external agent can pilot the entire platform — the thing Grounded doesn't ship yet."*
+**The gap being filled:** tools in this category are typically MCP **clients** — they *consume* external MCP servers as data connectors — but do **not** expose themselves as an MCP server, and ship **no public API** an external agent could call. So **building the platform as an MCP server is a genuine gap**, in the exact direction the category is moving. This is the strongest single pitch in the whole project: *"an external agent can pilot the entire platform."*
 
-Build an **MCP server** that exposes the clone's full capability surface, so any MCP host (Claude, Claude Code, etc.) can drive it end to end. Tools to expose:
+Build an **MCP server** that exposes the platform's full capability surface, so any MCP host (Claude, Claude Code, etc.) can drive it end to end. Tools to expose:
 
 | Tool | Does | Notes |
 |---|---|---|
@@ -82,19 +79,19 @@ Every one of these must route through the **same core service** the UI uses — 
 
 ## MANDATORY deliverables (not optional)
 
-These are what convert "built a clone" into "thinks like staff." Do not skip them.
+These are what convert "built a demo" into "thinks like staff." Do not skip them.
 
 1. **Live deployment on Vercel** — a working URL, seeded so it demos in 30 seconds without setup.
 2. **A working MCP server** exposing the tool set above, driving the same core service as the UI. This is the differentiator — Grounded has no such server or public API.
 3. **An example agent piloting via MCP** — a script or recorded Claude Code session that autonomously runs a full analysis through the MCP server (upload → ask → chart + table + code → summary). The living proof that an external agent can pilot the whole platform.
-4. **`docs/ARCHITECTURE.md` (ADR-style)** — the money document. Cover: the **core-service seam** (one core, two clients: UI + MCP), the sandbox choice (**optimal vs. practical**, exactly as the JD asks), the streaming approach, how untrusted code is isolated, the code-gen + error-repair loop, why Grounded-as-MCP-server matters, what you'd do with more time (scaling, multi-model, live DB connectors, larger files), and honest tradeoffs. This doc is read as your "opinions about architecture."
+4. **`docs/ARCHITECTURE.md` (ADR-style)** — the money document. Cover: the **core-service seam** (one core, two clients: UI + MCP), the sandbox choice (**optimal vs. practical** — the classic staff judgment call), the streaming approach, how untrusted code is isolated, the code-gen + error-repair loop, why the platform-as-MCP-server matters, what you'd do with more time (scaling, multi-model, live DB connectors, larger files), and honest tradeoffs. This doc is read as your "opinions about architecture."
 5. **Tests on the critical path** — at minimum: the code-execution/sandbox boundary and the code-gen→execute→interpret loop. Proves "strong engineering fundamentals, not just vibecoding." A couple of meaningful tests beat broad shallow coverage.
 
 Also expected: a **README** with a 3-line pitch, the live link, a GIF/screenshot of the core loop, run-locally steps, and a short "what I'd build next."
 
-## UI taste (a JD bonus that's cheap signal here)
+## UI taste (cheap, high-visibility signal)
 
-The JD explicitly wants UIs that **"don't look like AI generated."** So: restrained palette, real spacing rhythm, one good font, subtle motion, empty/loading/error states designed on purpose, charts that look publication-quality (Grounded's signature). This is disproportionately visible to a reviewer in 10 seconds — invest a focused pass, don't over-build.
+The UI must **not look AI-generated.** So: restrained palette, real spacing rhythm, one good font, subtle motion, empty/loading/error states designed on purpose, charts that look publication-quality (the category's signature). This is disproportionately visible to a reviewer in 10 seconds — invest a focused pass, don't over-build.
 
 ## Scored study plan (weighted — score yourself before you ship)
 
@@ -120,7 +117,7 @@ Score after a working build; anything under ~70 on items 1–5 (the core, the sa
 - **Match the stack; don't wander.** No auth systems, no billing, no teams, no Notebooks mode. Depth over breadth — every hour on an out-of-scope feature is an hour not spent on the sandbox or the ADR.
 - **Never let the model fabricate results.** Any number, table, or chart must come from executed code over the real uploaded data. This is both a correctness principle and a Grounded product principle — treat any model-produced fact as unverified until the sandbox produced it.
 - **Secure the sandbox for real.** Untrusted LLM-generated code runs here; no host filesystem/network access, hard timeouts, resource caps. Document the threat model in the ADR.
-- **Keep it demo-able.** Seed a dataset so the live link works instantly. A recruiter's 30-second look decides everything.
+- **Keep it demo-able.** Seed a dataset so the demo works instantly. A reviewer's 30-second look decides everything.
 - **Ship at startup pace.** Prefer a working narrow slice today over a perfect broad plan next week.
 
 ## Suggested milestones (adjust freely)

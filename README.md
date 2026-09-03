@@ -1,19 +1,19 @@
-# Grounded clone — AI data analyst
+# Grounded — AI data analyst
 
 [![CI](https://github.com/butkeraites/grounded-analyst/actions/workflows/ci.yml/badge.svg)](https://github.com/butkeraites/grounded-analyst/actions/workflows/ci.yml)
 
 Upload a dataset, ask a question in plain English, and get back a chart, a table,
 and a written interpretation — from **real Python executed in an isolated
-sandbox**, never a number the model guessed. A portfolio clone of
-[Grounded](https://grounded.ai) built on its exact stack.
+sandbox**, never a number the model guessed. A deep, production-grade reference
+build of an AI data analyst, engineered by **BIS · Butkeraites Intelligent
+Solutions**.
 
-> **Status: live and end-to-end.** Deployed on **Vercel + Neon + E2B + Groq**
-> (the deployment mirrors Grounded's own stack), and runs 100% local in Docker for
-> development. Upload → data profile → ask → **real Python executed in an isolated
-> sandbox** → streamed prose + chart + table + the generated code.
->
-> The live demo is password-gated (it executes code and calls a paid LLM) —
-> ask for the password.
+> **Source-available, runs 100% local.** Everything comes up with one Docker
+> command — no hosted vendor required. Upload → data profile → ask → **real
+> Python executed in an isolated sandbox** → streamed prose + chart + table +
+> the generated code. There is no public hosted demo (the app executes untrusted
+> code and calls a paid LLM); run it locally, or see the static walkthrough on
+> the [BIS site](https://bisdecisions.com/demos).
 
 ![The core loop: ask a question → streamed prose → a real matplotlib chart → a result table → the generated Python, on toggle.](docs/loop.gif)
 
@@ -154,7 +154,8 @@ To drive it as a real MCP server instead, a fresh Claude session picks up
 
 ## The platform as an MCP server — the differentiator
 
-Grounded is an MCP *client* and has no public API; this clone exposes **itself** as
+Most tools in this category are MCP *clients* — they consume external MCP servers
+as connectors — and expose no public API. Grounded exposes **itself** as
 an MCP server (`apps/mcp`), so any agent can pilot the whole platform. Every
 analyst tool routes through the same core the UI uses — a thin adapter, not a
 reimplementation:

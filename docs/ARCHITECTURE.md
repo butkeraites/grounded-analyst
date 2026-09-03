@@ -1,6 +1,6 @@
 # Architecture & decisions
 
-This is the design record for the Grounded clone: what it does, the calls I
+This is the design record for Grounded: what it does, the calls I
 made, and — as honestly as I can — where each call is *optimal* versus merely
 *practical for an MVP*. The governing principle throughout: **narrow scope, deep
 execution, the hard part solved for real.**
@@ -174,12 +174,12 @@ zero-dependency demo path. The adapter has a request timeout + retry/backoff on
 
 ---
 
-## 5. Why Grounded‑as‑an‑MCP‑server matters
+## 5. Why the platform‑as‑an‑MCP‑server matters
 
-Grounded is an MCP *client* — it consumes external MCP servers as connectors — and
-has **no public API** ("Grounded itself cannot be called via API," per their docs).
-So exposing the platform *as* an MCP server is a genuine gap this clone fills, in
-a direction Grounded already cares about. `apps/mcp` exposes `upload_dataset`,
+Tools in this category are typically MCP *clients* — they consume external MCP
+servers as connectors — and expose **no public API** an external agent could call.
+So exposing the platform *itself* as an MCP server is a genuine gap this build
+fills, in a direction the category is already moving. `apps/mcp` exposes `upload_dataset`,
 `list_datasets`, `run_analysis`, `get_code`, `get_table`, `get_chart`,
 `list_conversations`, `get_conversation` — each a thin adapter over the same
 core. Exposing **`get_code`** (the generated Python, not just the answer) is what

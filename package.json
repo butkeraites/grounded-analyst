@@ -2,7 +2,7 @@
   "name": "grounded-analyst",
   "private": true,
   "version": "0.1.0",
-  "description": "AI data analyst — upload a dataset, ask in plain English, get real executed Python back. Portfolio clone of Grounded.",
+  "description": "Grounded — an AI data analyst that runs real Python in an isolated sandbox: upload a dataset, ask in plain English, get a grounded answer, chart, table, and the generated code. By BIS.",
   "workspaces": [
     "apps/*",
     "packages/*"
